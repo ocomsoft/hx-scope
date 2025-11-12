@@ -234,6 +234,55 @@
         <div id="response3" class="response"></div>
     </div>
 
+    <!-- Demo 4: Checkbox hx-off-value Feature -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 4: Checkbox hx-off-value Feature</h2>
+        <p>Use <code>hx-off-value</code> to send a specific value when checkboxes are unchecked.</p>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="notifications" class="settings" hx-off-value="0" value="1" checked>
+                Enable Notifications <span class="scope-indicator">with hx-off-value="0"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="newsletter" class="settings" hx-off-value="false" value="true">
+                Subscribe to Newsletter <span class="scope-indicator">with hx-off-value="false"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="dark_mode" class="settings" hx-off-value="no" value="yes" checked>
+                Dark Mode <span class="scope-indicator">with hx-off-value="no"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="terms_accepted" class="settings" value="1">
+                Accept Terms <span class="scope-indicator">without hx-off-value</span>
+            </label>
+        </div>
+
+        <button hx-post="/api/settings" hx-scope=".settings" hx-target="#response4">
+            Save Settings
+        </button>
+
+        <div id="response4" class="response"></div>
+
+        <div style="margin-top: 15px; padding: 10px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 13px;">
+            <strong>Note:</strong> Toggle the checkboxes and click "Save Settings" to see how:
+            <ul style="margin: 8px 0; padding-left: 20px;">
+                <li>Checked boxes send their <code>value</code> attribute</li>
+                <li>Unchecked boxes with <code>hx-off-value</code> send that value</li>
+                <li>Unchecked boxes without <code>hx-off-value</code> send nothing</li>
+            </ul>
+        </div>
+    </div>
+
     <!-- Service Worker Registration -->
     <script>
         // Register service worker to intercept API requests

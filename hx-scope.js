@@ -14,6 +14,10 @@
  * When the button is clicked, only inputs matching the CSS selector will be included.
  * You can use any valid CSS selector: classes, IDs, attributes, combinators, etc.
  *
+ * Bonus feature - hx-off-value for checkboxes:
+ *   <input type="checkbox" hx-name="subscribe" hx-off-value="0" value="1">
+ *   When checked: sends subscribe=1, when unchecked: sends subscribe=0
+ *
  * @license MIT
  */
 
@@ -41,7 +45,12 @@
               // Get the value based on element type
               let value = '';
               if (element.type === 'checkbox') {
-                value = element.checked ? (element.value || 'on') : '';
+                if (element.checked) {
+                  value = element.value || 'on';
+                } else {
+                  // Use hx-off-value if specified, otherwise empty string
+                  value = element.getAttribute('hx-off-value') || '';
+                }
               } else if (element.type === 'radio') {
                 value = element.checked ? element.value : '';
               } else {

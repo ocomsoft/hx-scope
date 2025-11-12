@@ -108,6 +108,13 @@ The demo uses a Service Worker to intercept and display request details, so it m
   - Similar to the standard `name` attribute
   - Only inputs with `hx-name` AND matching the CSS selector are included
 
+- **`hx-off-value`**: Optional, applied to checkboxes
+  - Defines what value to send when the checkbox is unchecked
+  - Without this attribute, unchecked checkboxes send nothing
+  - Example: `<input type="checkbox" hx-name="subscribe" hx-off-value="0" value="1">`
+  - When checked: sends `subscribe=1`, when unchecked: sends `subscribe=0`
+  - Useful for boolean fields where you need explicit true/false values
+
 ### Selection Rules
 
 The extension queries for elements matching the `hx-scope` selector, then includes only those with `hx-name`:
@@ -369,6 +376,33 @@ The extension queries for elements matching the `hx-scope` selector, then includ
   </button>
 </div>
 ```
+
+### Using hx-off-value for Checkboxes
+
+```html
+<div hx-ext="scoped-inputs">
+  <!-- Standard checkboxes with hx-off-value -->
+  <input type="checkbox" hx-name="notifications" class="settings" hx-off-value="0" value="1" checked>
+  <input type="checkbox" hx-name="newsletter" class="settings" hx-off-value="false" value="true">
+  <input type="checkbox" hx-name="dark_mode" class="settings" hx-off-value="no" value="yes" checked>
+
+  <!-- Without hx-off-value, unchecked boxes send nothing -->
+  <input type="checkbox" hx-name="terms_accepted" class="settings" value="1">
+
+  <button hx-post="/save-settings" hx-scope=".settings">
+    Save Settings
+  </button>
+</div>
+```
+
+**What gets sent:**
+- If all are checked: `notifications=1&newsletter=true&dark_mode=yes&terms_accepted=1`
+- If all unchecked: `notifications=0&newsletter=false&dark_mode=no` (terms_accepted not sent)
+
+This is useful for:
+- Boolean preferences where you need explicit true/false values
+- Database fields that expect 1/0 or yes/no
+- APIs that require explicit false values instead of omitted fields
 
 ## Use Cases
 
