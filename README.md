@@ -74,63 +74,68 @@ The demo uses a Service Worker to intercept and display request details, so it m
 
 **Problem**: Both buttons send all three inputs, even though the user button doesn't need `admin-note` and the admin button doesn't need `username` or `email`.
 
-### The Solution: Scoped Inputs
+### The Solution: CSS Selectors
 
 ```html
 <div hx-ext="scoped-inputs">
-  <input type="text" hx-name="username" hx-scope="user-form" value="john">
-  <input type="text" hx-name="email" hx-scope="user-form" value="john@example.com">
-  <input type="text" hx-name="admin-note" hx-scope="admin-form" value="note">
+  <input type="text" hx-name="username" class="user-form" value="john">
+  <input type="text" hx-name="email" class="user-form" value="john@example.com">
+  <input type="text" hx-name="admin-note" class="admin-form" value="note">
 
-  <button hx-post="/user" hx-scope="user-form">Save User</button>  <!-- Only sends username, email -->
-  <button hx-post="/admin" hx-scope="admin-form">Save Note</button> <!-- Only sends admin-note -->
+  <button hx-post="/user" hx-scope=".user-form">Save User</button>  <!-- Only sends username, email -->
+  <button hx-post="/admin" hx-scope=".admin-form">Save Note</button> <!-- Only sends admin-note -->
 </div>
 ```
 
-**Solution**: Each button only sends inputs with matching scopes. You have complete control over which inputs are included in each request.
+**Solution**: Each button uses a CSS selector to specify which inputs to include. You have complete control using familiar CSS syntax.
 
 ### How It Works
 
 1. **Enable the extension**: Add `hx-ext="scoped-inputs"` to a parent element
-2. **Mark the trigger**: Add `hx-scope="scope-name"` to the element that triggers the HTMX request (button, link, etc.)
-3. **Name your inputs**: Use `hx-name="param-name"` instead of `name` attribute
-4. **Optionally scope inputs**: Add `hx-scope="scope-name"` to inputs to restrict them to specific scopes
+2. **Add CSS selector to trigger**: Add `hx-scope="<css-selector>"` to the element that triggers the HTMX request
+3. **Name your inputs**: Use `hx-name="param-name"` on inputs you want to include
+4. **Make inputs selectable**: Add classes, IDs, or attributes that match your selectors
 
 ### Key Attributes
 
-- **`hx-scope`**: Applied to both triggers and inputs
-  - On triggers: Defines which scope(s) this request belongs to
-  - On inputs: Defines which scope(s) this input belongs to
-  - Supports multiple scopes: `hx-scope="form1 form2"`
+- **`hx-scope`**: Applied to triggers (buttons, links, etc.)
+  - Contains a CSS selector that matches the inputs to include
+  - Examples: `.user-form`, `#section1 input`, `[data-form="user"]`, `.step-1, .step-2`
+  - Any valid CSS selector works: classes, IDs, attributes, combinators, pseudo-selectors, etc.
 
-- **`hx-name`**: Applied to inputs only
+- **`hx-name`**: Applied to inputs
   - Defines the parameter name for the input value
-  - Similar to the standard `name` attribute, but scope-aware
+  - Similar to the standard `name` attribute
+  - Only inputs with `hx-name` AND matching the CSS selector are included
 
-### Scope Matching Rules
+### Selection Rules
 
-1. **Input without `hx-scope`**: Always included in the request
-2. **Input with `hx-scope`**: Only included if at least one scope matches the trigger's scope
-3. **Multiple scopes**: Both triggers and inputs can have multiple space-separated scopes
+The extension queries for elements matching the `hx-scope` selector, then includes only those with `hx-name`:
 
-### Advanced Example: Multiple Scopes
+- If an element matches the selector AND has `hx-name`, it's included
+- If an element doesn't match the selector, it's excluded (even with `hx-name`)
+- If an element matches but lacks `hx-name`, it's ignored
+
+### Advanced Example: CSS Selector Power
 
 ```html
 <div hx-ext="scoped-inputs">
-  <!-- This button includes inputs from both user-form AND profile-form scopes -->
-  <button hx-post="/submit-all" hx-scope="user-form profile-form">Submit All</button>
+  <!-- Using comma-separated selectors to include multiple groups -->
+  <button hx-post="/submit-all" hx-scope=".user-form, .profile-form">Submit All</button>
 
-  <!-- This input matches user-form -->
-  <input type="text" hx-name="username" hx-scope="user-form" value="john">
+  <!-- Using descendant selectors -->
+  <button hx-post="/submit-section" hx-scope="#user-section input[hx-name]">Submit Section</button>
 
-  <!-- This input matches profile-form -->
-  <input type="text" hx-name="bio" hx-scope="profile-form" value="Developer">
+  <!-- Using attribute selectors -->
+  <button hx-post="/submit-step" hx-scope="[data-step='1']">Submit Step 1</button>
 
-  <!-- This input matches both scopes -->
-  <input type="text" hx-name="email" hx-scope="user-form profile-form" value="john@example.com">
+  <div id="user-section">
+    <input type="text" hx-name="username" class="user-form" value="john">
+    <input type="text" hx-name="email" class="user-form profile-form" value="john@example.com">
+  </div>
 
-  <!-- This input is always included (no scope) -->
-  <input type="hidden" hx-name="timestamp" value="2025-11-12">
+  <input type="text" hx-name="bio" class="profile-form" value="Developer">
+  <input type="text" hx-name="age" data-step="1" value="30">
 </div>
 ```
 
@@ -139,33 +144,37 @@ The demo uses a Service Worker to intercept and display request details, so it m
 ```html
 <div hx-ext="scoped-inputs">
   <h2>User Registration</h2>
-  <input type="text" hx-name="username" hx-scope="registration">
-  <input type="email" hx-name="email" hx-scope="registration">
-  <button hx-post="/register" hx-scope="registration">Register</button>
+  <input type="text" hx-name="username" class="registration">
+  <input type="email" hx-name="email" class="registration">
+  <button hx-post="/register" hx-scope=".registration">Register</button>
 
   <h2>Newsletter Signup</h2>
-  <input type="email" hx-name="email" hx-scope="newsletter">
-  <button hx-post="/newsletter" hx-scope="newsletter">Subscribe</button>
+  <input type="email" hx-name="email" class="newsletter">
+  <button hx-post="/newsletter" hx-scope=".newsletter">Subscribe</button>
 
-  <h2>Analytics (sent with all requests)</h2>
-  <input type="hidden" hx-name="page-id" value="home">
+  <h2>Global Analytics</h2>
+  <input type="hidden" hx-name="page-id" class="analytics">
+  <!-- Include analytics with both forms using multiple selectors -->
+  <button hx-post="/register-with-tracking" hx-scope=".registration, .analytics">Register (tracked)</button>
 </div>
 ```
 
-**Key difference**: Without scoping, clicking "Register" would send **all inputs** (username, both emails, and page-id). With hx-scope, it only sends inputs with matching scopes (username, registration email, and page-id).
+**Key difference**: Without scoping, clicking "Register" would send **all inputs** (username, both emails, page-id). With hx-scope, you use CSS selectors to include exactly the inputs you want.
 
 ## Use Cases
 
 ### Only Send What You Need
 
-Unlike traditional forms that submit **all** inputs regardless of which button is clicked, hx-scope gives you precise control:
+Unlike traditional forms that submit **all** inputs regardless of which button is clicked, hx-scope gives you precise control using CSS selectors:
 
-- **Multiple logical forms in one container**: Have user settings, admin controls, and analytics inputs all in the same DOM area, but only submit the relevant ones for each action
-- **Conditional data submission**: Different buttons can send completely different sets of inputs, even if they're intermingled in the HTML
-- **Prevent data leakage**: Ensure sensitive inputs are only sent when explicitly needed, not accidentally included in every request
-- **Reuse input names**: Have multiple `email` or `name` inputs for different purposes, distinguished by scope rather than unique names
-- **Wizard-style forms**: Submit only the current step's inputs, not the entire form
-- **Dynamic forms**: Add/remove inputs from scopes dynamically based on user interaction
+- **Multiple logical forms in one container**: Use classes like `.user-form` and `.admin-form` to distinguish different form groups in the same area
+- **Conditional data submission**: Different buttons use different selectors to send completely different sets of inputs, even if they're intermingled
+- **Prevent data leakage**: Ensure sensitive inputs are only sent when explicitly selected, not accidentally included in every request
+- **Structural selection**: Use selectors like `#section1 input` to include all inputs within a specific container
+- **Attribute-based grouping**: Use `[data-step="1"]` to group inputs by custom attributes
+- **Wizard-style forms**: Use `.step-1`, `.step-2` classes and submit only the current step
+- **Complex selection logic**: Combine selectors with commas (`.form1, .form2`), use `:not()` to exclude elements, or any other CSS selector feature
+- **No naming conflicts**: The same input can match multiple selectors by having multiple classes
 
 ## Browser Support
 

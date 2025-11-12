@@ -116,115 +116,119 @@
         Opening the file directly (file://) will not work.
     </div>
 
-    <!-- Demo 1: Basic Scoping -->
+    <!-- Demo 1: Basic CSS Class Selectors -->
     <div class="demo-section" hx-ext="scoped-inputs">
-        <h2>Demo 1: Basic Scoping</h2>
-        <p>Two separate forms on the same page. Each button only submits inputs from its own scope.</p>
+        <h2>Demo 1: Basic CSS Class Selectors</h2>
+        <p>Two separate forms on the same page. Each button uses a CSS selector to include only its inputs.</p>
 
         <div class="form-group">
-            <label>Username <span class="scope-indicator">user-form</span></label>
-            <input type="text" hx-name="username" hx-scope="user-form" value="john_doe" placeholder="Enter username">
+            <label>Username <span class="scope-indicator">.user-form</span></label>
+            <input type="text" hx-name="username" class="user-form" value="john_doe" placeholder="Enter username">
         </div>
 
         <div class="form-group">
-            <label>Email <span class="scope-indicator">user-form</span></label>
-            <input type="email" hx-name="email" hx-scope="user-form" value="john@example.com" placeholder="Enter email">
+            <label>Email <span class="scope-indicator">.user-form</span></label>
+            <input type="email" hx-name="email" class="user-form" value="john@example.com" placeholder="Enter email">
         </div>
 
-        <button hx-post="/api/user" hx-scope="user-form" hx-target="#response1">
-            Submit User Form
+        <button hx-post="/api/user" hx-scope=".user-form" hx-target="#response1">
+            Submit User Form (selector: .user-form)
         </button>
 
         <hr style="margin: 20px 0;">
 
         <div class="form-group">
-            <label>Newsletter Email <span class="scope-indicator">newsletter</span></label>
-            <input type="email" hx-name="email" hx-scope="newsletter" value="newsletter@example.com" placeholder="Enter email">
+            <label>Newsletter Email <span class="scope-indicator">.newsletter</span></label>
+            <input type="email" hx-name="email" class="newsletter" value="newsletter@example.com" placeholder="Enter email">
         </div>
 
         <div class="form-group">
-            <label>Preferences <span class="scope-indicator">newsletter</span></label>
-            <select hx-name="frequency" hx-scope="newsletter">
+            <label>Preferences <span class="scope-indicator">.newsletter</span></label>
+            <select hx-name="frequency" class="newsletter">
                 <option value="daily">Daily</option>
                 <option value="weekly" selected>Weekly</option>
                 <option value="monthly">Monthly</option>
             </select>
         </div>
 
-        <button hx-post="/api/newsletter" hx-scope="newsletter" hx-target="#response1">
-            Subscribe to Newsletter
+        <button hx-post="/api/newsletter" hx-scope=".newsletter" hx-target="#response1">
+            Subscribe to Newsletter (selector: .newsletter)
         </button>
 
         <div id="response1" class="response"></div>
     </div>
 
-    <!-- Demo 2: Multiple Scopes -->
+    <!-- Demo 2: Multiple Selectors (Comma-Separated) -->
     <div class="demo-section" hx-ext="scoped-inputs">
-        <h2>Demo 2: Multiple Scopes</h2>
-        <p>Inputs and buttons can belong to multiple scopes simultaneously.</p>
+        <h2>Demo 2: Multiple Selectors (Comma-Separated)</h2>
+        <p>Use comma-separated CSS selectors to include inputs from multiple groups.</p>
 
         <div class="form-group">
-            <label>First Name <span class="scope-indicator">profile</span></label>
-            <input type="text" hx-name="first_name" hx-scope="profile" value="John" placeholder="First name">
+            <label>First Name <span class="scope-indicator">.profile</span></label>
+            <input type="text" hx-name="first_name" class="profile" value="John" placeholder="First name">
         </div>
 
         <div class="form-group">
-            <label>Last Name <span class="scope-indicator">profile</span></label>
-            <input type="text" hx-name="last_name" hx-scope="profile" value="Doe" placeholder="Last name">
+            <label>Last Name <span class="scope-indicator">.profile</span></label>
+            <input type="text" hx-name="last_name" class="profile" value="Doe" placeholder="Last name">
         </div>
 
         <div class="form-group">
-            <label>Bio <span class="scope-indicator">profile</span> <span class="scope-indicator">extended</span></label>
-            <textarea hx-name="bio" hx-scope="profile extended" rows="3" placeholder="Tell us about yourself">Software developer passionate about web technologies.</textarea>
+            <label>Bio <span class="scope-indicator">.profile .extended</span></label>
+            <textarea hx-name="bio" class="profile extended" rows="3" placeholder="Tell us about yourself">Software developer passionate about web technologies.</textarea>
         </div>
 
         <div class="form-group">
-            <label>Website <span class="scope-indicator">extended</span></label>
-            <input type="url" hx-name="website" hx-scope="extended" value="https://example.com" placeholder="Your website">
+            <label>Website <span class="scope-indicator">.extended</span></label>
+            <input type="url" hx-name="website" class="extended" value="https://example.com" placeholder="Your website">
         </div>
 
-        <button hx-post="/api/profile/basic" hx-scope="profile" hx-target="#response2">
-            Save Basic Profile (profile scope only)
+        <button hx-post="/api/profile/basic" hx-scope=".profile" hx-target="#response2">
+            Save Basic Profile (selector: .profile)
         </button>
 
-        <button hx-post="/api/profile/full" hx-scope="profile extended" hx-target="#response2">
-            Save Full Profile (profile + extended scopes)
+        <button hx-post="/api/profile/full" hx-scope=".profile, .extended" hx-target="#response2">
+            Save Full Profile (selector: .profile, .extended)
         </button>
 
         <div id="response2" class="response"></div>
     </div>
 
-    <!-- Demo 3: Always-Included Inputs -->
+    <!-- Demo 3: Attribute Selectors & Combining Selectors -->
     <div class="demo-section" hx-ext="scoped-inputs">
-        <h2>Demo 3: Always-Included Inputs</h2>
-        <p>Inputs without a scope are always included in all requests.</p>
+        <h2>Demo 3: Attribute Selectors & Combining Selectors</h2>
+        <p>Use attribute selectors and combine them with classes for powerful selection logic.</p>
 
         <div class="form-group">
-            <label>Action Type <span class="scope-indicator">action-a</span></label>
-            <input type="text" hx-name="action_type" hx-scope="action-a" value="create" placeholder="Action type">
+            <label>Action Type <span class="scope-indicator">[data-action="a"]</span></label>
+            <input type="text" hx-name="action_type" data-action="a" value="create" placeholder="Action type">
         </div>
 
         <div class="form-group">
-            <label>Settings <span class="scope-indicator">action-b</span></label>
-            <input type="text" hx-name="settings" hx-scope="action-b" value="enabled" placeholder="Settings">
+            <label>Settings <span class="scope-indicator">[data-action="b"]</span></label>
+            <input type="text" hx-name="settings" data-action="b" value="enabled" placeholder="Settings">
         </div>
 
         <div class="form-group">
-            <label>Session Token <span class="scope-indicator">always included</span></label>
-            <input type="text" hx-name="session_token" value="abc123xyz" placeholder="Session token" readonly>
+            <label>Session Token <span class="scope-indicator">.global</span></label>
+            <input type="text" hx-name="session_token" class="global" value="abc123xyz" placeholder="Session token" readonly>
         </div>
 
         <div class="form-group">
-            <label>Timestamp <span class="scope-indicator">always included</span></label>
-            <input type="text" hx-name="timestamp" value="2025-11-12T10:30:00Z" placeholder="Timestamp" readonly>
+            <label>Timestamp <span class="scope-indicator">.global</span></label>
+            <input type="text" hx-name="timestamp" class="global" value="2025-11-12T10:30:00Z" placeholder="Timestamp" readonly>
         </div>
 
-        <button hx-post="/api/action/a" hx-scope="action-a" hx-target="#response3">
-            Execute Action A (includes action_type + global fields)
+        <button hx-post="/api/action/a" hx-scope="[data-action='a']" hx-target="#response3">
+            Action A Only (selector: [data-action='a'])
         </button>
 
-        <button hx-post="/api/action/b" hx-scope="action-b" hx-target="#response3">
-            Execute Action B (includes settings + global fields)
+        <button hx-post="/api/action/b" hx-scope="[data-action='b'], .global" hx-target="#response3">
+            Action B + Global (selector: [data-action='b'], .global)
+        </button>
+
+        <button hx-post="/api/action/all" hx-scope="[data-action], .global" hx-target="#response3">
+            All Actions + Global (selector: [data-action], .global)
         </button>
 
         <div id="response3" class="response"></div>

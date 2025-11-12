@@ -1,18 +1,18 @@
 /**
- * hx-scope - HTMX Extension for Scoped Input Parameters
+ * hx-scope - HTMX Extension for Selective Input Inclusion
  *
  * This extension allows you to control which form inputs are included in HTMX requests
- * by using scopes. This is useful when you have multiple forms or input groups on a page
- * and want to selectively include inputs based on scope matching.
+ * using CSS selectors. Unlike traditional forms where all inputs are submitted, this lets
+ * you scope inputs so they're only included when you want them to be.
  *
  * Usage:
- *   <button hx-post="/submit" hx-scope="user-form">Submit User</button>
- *   <input type="text" hx-name="username" hx-scope="user-form" value="john">
- *   <input type="text" hx-name="email" hx-scope="user-form" value="john@example.com">
- *   <input type="text" hx-name="admin-note" hx-scope="admin-form" value="note">
+ *   <button hx-post="/submit" hx-scope=".user-form">Submit User</button>
+ *   <input type="text" hx-name="username" class="user-form" value="john">
+ *   <input type="text" hx-name="email" class="user-form" value="john@example.com">
+ *   <input type="text" hx-name="admin-note" class="admin-form" value="note">
  *
- * When the button is clicked, only inputs with matching scope (user-form) will be included.
- * Inputs without hx-scope attribute are always included.
+ * When the button is clicked, only inputs matching the CSS selector will be included.
+ * You can use any valid CSS selector: classes, IDs, attributes, combinators, etc.
  *
  * @license MIT
  */
@@ -22,38 +22,45 @@
     onEvent: function(name, evt) {
       if (name === 'htmx:configRequest') {
         const target = evt.detail.target;
-        const targetScopes = target.getAttribute('hx-scope');
+        const scopeSelector = target.getAttribute('hx-scope');
 
         // Only run if target has hx-scope attribute
-        if (targetScopes === null) return;
+        if (!scopeSelector) return;
 
-        // Search within the closest form, or target's parent element
-        const searchRoot = target.closest('form') || target.parentElement;
-        if (!searchRoot) return;
+        // Search within the closest form, or target's parent element, or document
+        const searchRoot = target.closest('form') || target.parentElement || document;
 
-        // Find all inputs/selects with hx-name in that area
-        const inputs = searchRoot.querySelectorAll(`input[hx-name], select[hx-name], textarea[hx-name]`);
+        try {
+          // Use the hx-scope value as a CSS selector
+          const matchedElements = searchRoot.querySelectorAll(scopeSelector);
 
-        inputs.forEach(input => {
-          const paramName = input.getAttribute('hx-name');
-          const inputScopes = input.getAttribute('hx-scope');
+          matchedElements.forEach(element => {
+            // Only include elements that have hx-name attribute
+            const paramName = element.getAttribute('hx-name');
+            if (paramName) {
+              // Get the value based on element type
+              let value = '';
+              if (element.type === 'checkbox') {
+                value = element.checked ? (element.value || 'on') : '';
+              } else if (element.type === 'radio') {
+                value = element.checked ? element.value : '';
+              } else {
+                value = element.value;
+              }
 
-          let shouldInclude = false;
-
-          if (!inputScopes) {
-            // Input has no scope - always include it
-            shouldInclude = true;
-          } else if (targetScopes) {
-            // Both have scopes - check if they match
-            const targetScopeList = targetScopes.split(/\s+/);
-            const inputScopeList = inputScopes.split(/\s+/);
-            shouldInclude = targetScopeList.some(scope => inputScopeList.includes(scope));
-          }
-
-          if (shouldInclude) {
-            evt.detail.parameters[paramName] = input.value;
-          }
-        });
+              // Only add if there's a value (for checkboxes/radios) or always for other inputs
+              if (element.type === 'checkbox' || element.type === 'radio') {
+                if (value) {
+                  evt.detail.parameters[paramName] = value;
+                }
+              } else {
+                evt.detail.parameters[paramName] = value;
+              }
+            }
+          });
+        } catch (error) {
+          console.error('hx-scope: Invalid CSS selector:', scopeSelector, error);
+        }
       }
     }
   });
