@@ -47,14 +47,16 @@ async function handleCalculateRequest(request) {
     const price = parseFloat(params.price) || 0;
     const total = quantity * price;
 
-    // Format the response
+    // Format the response - just return the formatted total
+    // The hx-target will replace the content of the target element
     const html = `Line Total: $${total.toFixed(2)}`;
 
     return new Response(html, {
         status: 200,
         headers: {
             'Content-Type': 'text/html',
-            'X-Demo-Response': 'true'
+            'X-Demo-Response': 'true',
+            'X-Calculated-Total': total.toFixed(2)  // Send total as header for debugging
         }
     });
 }

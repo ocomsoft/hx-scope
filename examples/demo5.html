@@ -160,7 +160,17 @@
                         <input type="number" hx-name="price" class="item-1" value="899.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
                     </div>
                     <div class="form-group">
-                        <button hx-post="/calculate" hx-scope=".item-1" hx-target="#line-1-result" style="width: 100%; margin: 0;">
+                        <button
+                            hx-post="/calculate"
+                            hx-scope=".item-1"
+                            hx-target="#line-1-result"
+                            hx-on::after-request="
+                                const qty = document.querySelector('.item-1[hx-name=quantity]').value;
+                                const price = document.querySelector('.item-1[hx-name=price]').value;
+                                const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
+                                document.querySelector('[name=line_total_1]').value = total;
+                            "
+                            style="width: 100%; margin: 0;">
                             Calculate
                         </button>
                     </div>
@@ -168,7 +178,7 @@
                 <div id="line-1-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
                     Line Total: $1,799.98
                 </div>
-                <input type="hidden" name="line_total_1" value="1799.98">
+                <input type="hidden" name="line_total_1" id="line_total_1" value="1799.98">
                 <input type="hidden" name="product_id_1" value="laptop">
             </div>
 
@@ -185,7 +195,17 @@
                         <input type="number" hx-name="price" class="item-2" value="49.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
                     </div>
                     <div class="form-group">
-                        <button hx-post="/calculate" hx-scope=".item-2" hx-target="#line-2-result" style="width: 100%; margin: 0;">
+                        <button
+                            hx-post="/calculate"
+                            hx-scope=".item-2"
+                            hx-target="#line-2-result"
+                            hx-on::after-request="
+                                const qty = document.querySelector('.item-2[hx-name=quantity]').value;
+                                const price = document.querySelector('.item-2[hx-name=price]').value;
+                                const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
+                                document.querySelector('[name=line_total_2]').value = total;
+                            "
+                            style="width: 100%; margin: 0;">
                             Calculate
                         </button>
                     </div>
@@ -193,7 +213,7 @@
                 <div id="line-2-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
                     Line Total: $49.99
                 </div>
-                <input type="hidden" name="line_total_2" value="49.99">
+                <input type="hidden" name="line_total_2" id="line_total_2" value="49.99">
                 <input type="hidden" name="product_id_2" value="mouse">
             </div>
 
@@ -210,7 +230,17 @@
                         <input type="number" hx-name="price" class="item-3" value="79.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
                     </div>
                     <div class="form-group">
-                        <button hx-post="/calculate" hx-scope=".item-3" hx-target="#line-3-result" style="width: 100%; margin: 0;">
+                        <button
+                            hx-post="/calculate"
+                            hx-scope=".item-3"
+                            hx-target="#line-3-result"
+                            hx-on::after-request="
+                                const qty = document.querySelector('.item-3[hx-name=quantity]').value;
+                                const price = document.querySelector('.item-3[hx-name=price]').value;
+                                const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
+                                document.querySelector('[name=line_total_3]').value = total;
+                            "
+                            style="width: 100%; margin: 0;">
                             Calculate
                         </button>
                     </div>
@@ -218,7 +248,7 @@
                 <div id="line-3-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
                     Line Total: $239.97
                 </div>
-                <input type="hidden" name="line_total_3" value="239.97">
+                <input type="hidden" name="line_total_3" id="line_total_3" value="239.97">
                 <input type="hidden" name="product_id_3" value="keyboard">
             </div>
 
