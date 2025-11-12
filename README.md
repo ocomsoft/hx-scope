@@ -1,6 +1,17 @@
 # hx-scope
 
-An HTMX extension for scoped input parameters. Control which form inputs are included in HTMX requests using scope matching.
+An HTMX extension for selective input inclusion. Unlike traditional forms where **all inputs are always submitted**, this extension lets you scope inputs so they're **only included when you want them to be**.
+
+## Why Use This?
+
+In standard HTML forms and HTMX, all inputs within a form are included in every request. This becomes problematic when:
+
+- You have multiple logical forms in one `<form>` element
+- Different buttons should submit different sets of inputs
+- You want to reuse the same input names for different purposes
+- You need fine-grained control over which data gets sent
+
+**hx-scope solves this** by letting you tag inputs with scopes and only including them when their scope matches the triggering element.
 
 ## Installation
 
@@ -47,19 +58,36 @@ The demo uses a Service Worker to intercept and display request details, so it m
 
 ## Usage
 
-### Basic Example
+### The Problem: Traditional Forms Submit Everything
+
+```html
+<!-- Traditional approach: ALL inputs are submitted with EVERY button click -->
+<form>
+  <input name="username" value="john">
+  <input name="email" value="john@example.com">
+  <input name="admin-note" value="note">
+
+  <button hx-post="/user">Save User</button>  <!-- Sends ALL 3 inputs -->
+  <button hx-post="/admin">Save Note</button> <!-- Also sends ALL 3 inputs -->
+</form>
+```
+
+**Problem**: Both buttons send all three inputs, even though the user button doesn't need `admin-note` and the admin button doesn't need `username` or `email`.
+
+### The Solution: Scoped Inputs
 
 ```html
 <div hx-ext="scoped-inputs">
-  <button hx-post="/submit" hx-scope="user-form">Submit User</button>
-
   <input type="text" hx-name="username" hx-scope="user-form" value="john">
   <input type="text" hx-name="email" hx-scope="user-form" value="john@example.com">
   <input type="text" hx-name="admin-note" hx-scope="admin-form" value="note">
+
+  <button hx-post="/user" hx-scope="user-form">Save User</button>  <!-- Only sends username, email -->
+  <button hx-post="/admin" hx-scope="admin-form">Save Note</button> <!-- Only sends admin-note -->
 </div>
 ```
 
-When the button is clicked, only inputs with matching scope (`user-form`) will be included in the request. The `admin-note` input will be excluded because its scope doesn't match.
+**Solution**: Each button only sends inputs with matching scopes. You have complete control over which inputs are included in each request.
 
 ### How It Works
 
@@ -124,12 +152,20 @@ When the button is clicked, only inputs with matching scope (`user-form`) will b
 </div>
 ```
 
+**Key difference**: Without scoping, clicking "Register" would send **all inputs** (username, both emails, and page-id). With hx-scope, it only sends inputs with matching scopes (username, registration email, and page-id).
+
 ## Use Cases
 
-- **Multiple forms on one page**: Prevent input collisions when multiple forms exist
-- **Conditional input inclusion**: Include different sets of inputs based on which action is triggered
-- **Complex form interactions**: Build sophisticated UIs with selective data submission
-- **Wizard-style forms**: Submit only relevant steps in multi-step forms
+### Only Send What You Need
+
+Unlike traditional forms that submit **all** inputs regardless of which button is clicked, hx-scope gives you precise control:
+
+- **Multiple logical forms in one container**: Have user settings, admin controls, and analytics inputs all in the same DOM area, but only submit the relevant ones for each action
+- **Conditional data submission**: Different buttons can send completely different sets of inputs, even if they're intermingled in the HTML
+- **Prevent data leakage**: Ensure sensitive inputs are only sent when explicitly needed, not accidentally included in every request
+- **Reuse input names**: Have multiple `email` or `name` inputs for different purposes, distinguished by scope rather than unique names
+- **Wizard-style forms**: Submit only the current step's inputs, not the entire form
+- **Dynamic forms**: Add/remove inputs from scopes dynamically based on user interaction
 
 ## Browser Support
 
