@@ -283,6 +283,119 @@
         </div>
     </div>
 
+    <!-- Demo 5: Component Isolation - Line Item Calculation -->
+    <div class="demo-section">
+        <h2>Demo 5: Component Isolation - Line Item Calculation</h2>
+        <p>This demonstrates the <strong>killer feature</strong>: Using <code>hx-name</code> (excluded from form) vs <code>name</code> (included in form) for component isolation.</p>
+
+        <div class="note" style="background: #e0f2fe; border-color: #0284c7; margin-bottom: 20px;">
+            <strong>Key Concept:</strong> Each line item uses <code>hx-name="quantity"</code> and <code>hx-name="price"</code> - the same names!
+            These are <strong>NOT</strong> submitted with the form. Only the calculated totals (with <code>name</code> attribute) are submitted.
+        </div>
+
+        <form hx-ext="scoped-inputs" id="checkout-form">
+            <h3 style="margin-top: 0;">Shopping Cart</h3>
+
+            <!-- Line Item 1 -->
+            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+                <h4 style="margin-top: 0; color: #1f2937;">Product A - Laptop <span class="scope-indicator">.item-1</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label>Quantity <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="quantity" class="item-1" value="2" min="1" style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($) <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="price" class="item-1" value="899.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <button hx-post="/calculate" hx-scope=".item-1" hx-target="#line-1-result" style="width: 100%; margin: 0;">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+                <div id="line-1-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                    Line Total: $1,799.98
+                </div>
+                <input type="hidden" name="line_total_1" value="1799.98">
+                <input type="hidden" name="product_id_1" value="laptop">
+            </div>
+
+            <!-- Line Item 2 -->
+            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+                <h4 style="margin-top: 0; color: #1f2937;">Product B - Mouse <span class="scope-indicator">.item-2</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label>Quantity <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="quantity" class="item-2" value="1" min="1" style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($) <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="price" class="item-2" value="49.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <button hx-post="/calculate" hx-scope=".item-2" hx-target="#line-2-result" style="width: 100%; margin: 0;">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+                <div id="line-2-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                    Line Total: $49.99
+                </div>
+                <input type="hidden" name="line_total_2" value="49.99">
+                <input type="hidden" name="product_id_2" value="mouse">
+            </div>
+
+            <!-- Line Item 3 -->
+            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+                <h4 style="margin-top: 0; color: #1f2937;">Product C - Keyboard <span class="scope-indicator">.item-3</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label>Quantity <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="quantity" class="item-3" value="3" min="1" style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($) <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="price" class="item-3" value="79.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <button hx-post="/calculate" hx-scope=".item-3" hx-target="#line-3-result" style="width: 100%; margin: 0;">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+                <div id="line-3-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                    Line Total: $239.97
+                </div>
+                <input type="hidden" name="line_total_3" value="239.97">
+                <input type="hidden" name="product_id_3" value="keyboard">
+            </div>
+
+            <hr style="margin: 20px 0;">
+
+            <div style="text-align: right; font-size: 18px; font-weight: 600; margin: 20px 0;">
+                Cart Total: $2,089.94
+            </div>
+
+            <button type="button" hx-post="/api/checkout" hx-target="#checkout-result" style="background: #059669; font-size: 16px;">
+                Proceed to Checkout (Submit Form Data)
+            </button>
+
+            <div id="checkout-result" class="response"></div>
+        </form>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 13px;">
+            <strong>What's happening:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Calculate buttons:</strong> Use <code>hx-scope</code> to send only <code>quantity</code> and <code>price</code> from their specific line item to <code>/calculate</code></li>
+                <li><strong>Each line item:</strong> Uses the same <code>hx-name="quantity"</code> and <code>hx-name="price"</code> - no conflicts!</li>
+                <li><strong>Checkout button:</strong> Only sends the hidden inputs with <code>name</code> attribute: <code>line_total_1</code>, <code>product_id_1</code>, <code>line_total_2</code>, etc.</li>
+                <li><strong>NOT sent on checkout:</strong> The intermediate <code>quantity</code> and <code>price</code> values (they use <code>hx-name</code>, not <code>name</code>)</li>
+            </ul>
+            <p style="margin: 10px 0 0 0;"><strong>Try it:</strong> Change a quantity, click Calculate to update that line's total, then click Checkout to see only the final totals are submitted!</p>
+        </div>
+    </div>
+
     <!-- Service Worker Registration -->
     <script>
         // Register service worker to intercept API requests

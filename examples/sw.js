@@ -16,11 +16,48 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Only intercept requests to /api/*
-    if (url.pathname.startsWith('/api/')) {
+    // Intercept /calculate endpoint for line item calculations
+    if (url.pathname === '/calculate') {
+        event.respondWith(handleCalculateRequest(event.request));
+    }
+    // Intercept requests to /api/*
+    else if (url.pathname.startsWith('/api/')) {
         event.respondWith(handleApiRequest(event.request));
     }
 });
+
+async function handleCalculateRequest(request) {
+    // Parse the request body to get quantity and price
+    let params = {};
+    if (request.method === 'POST') {
+        const contentType = request.headers.get('content-type') || '';
+
+        if (contentType.includes('application/json')) {
+            params = await request.json();
+        } else if (contentType.includes('application/x-www-form-urlencoded')) {
+            const formData = await request.formData();
+            for (const [key, value] of formData) {
+                params[key] = value;
+            }
+        }
+    }
+
+    // Extract quantity and price, default to 0 if not provided
+    const quantity = parseFloat(params.quantity) || 0;
+    const price = parseFloat(params.price) || 0;
+    const total = quantity * price;
+
+    // Format the response
+    const html = `Line Total: $${total.toFixed(2)}`;
+
+    return new Response(html, {
+        status: 200,
+        headers: {
+            'Content-Type': 'text/html',
+            'X-Demo-Response': 'true'
+        }
+    });
+}
 
 async function handleApiRequest(request) {
     const url = new URL(request.url);

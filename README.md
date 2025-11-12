@@ -13,6 +13,50 @@ In standard HTML forms and HTMX, all inputs within a form are included in every 
 
 **hx-scope solves this** by letting you tag inputs with scopes and only including them when their scope matches the triggering element.
 
+## The Key Concept: hx-name vs name
+
+**This is the killer feature**: Inputs with `hx-name` are **completely excluded** from parent form submission. They're **only** included when explicitly selected by an `hx-scope` selector.
+
+- `name` attribute → Included in standard form submission
+- `hx-name` attribute → **Excluded** from form submission, **only** included via `hx-scope`
+
+This enables **component isolation** within forms:
+
+```html
+<form hx-post="/checkout">
+  <!-- Line item component 1 - uses hx-name -->
+  <div class="line-item" hx-ext="scoped-inputs">
+    <input hx-name="quantity" class="item-1" value="2">
+    <input hx-name="price" class="item-1" value="10.00">
+    <button hx-post="/calculate" hx-scope=".item-1" hx-target="#total-1">Calculate</button>
+    <span id="total-1"></span>
+    <!-- This uses 'name' so it's submitted with the form -->
+    <input type="hidden" name="line_total_1" value="20.00">
+  </div>
+
+  <!-- Line item component 2 - uses hx-name -->
+  <div class="line-item" hx-ext="scoped-inputs">
+    <input hx-name="quantity" class="item-2" value="1">
+    <input hx-name="price" class="item-2" value="15.00">
+    <button hx-post="/calculate" hx-scope=".item-2" hx-target="#total-2">Calculate</button>
+    <span id="total-2"></span>
+    <input type="hidden" name="line_total_2" value="15.00">
+  </div>
+
+  <button type="submit">Checkout</button> <!-- Only submits line_total_1, line_total_2 -->
+</form>
+```
+
+**What happens:**
+1. Click "Calculate" on item 1 → Only sends `quantity` and `price` from `.item-1` to `/calculate`
+2. Server returns updated total → Updates `line_total_1` hidden input
+3. Click main "Checkout" → Form submission only sends `line_total_1` and `line_total_2` (not the intermediate quantity/price values)
+
+**Without hx-scope**, you'd have no way to:
+- Use the same input names (`quantity`, `price`) in multiple components
+- Calculate intermediate values without submitting them to the parent form
+- Keep component logic isolated while still being in the same `<form>`
+
 ## Installation
 
 ### Via CDN
@@ -403,6 +447,115 @@ This is useful for:
 - Boolean preferences where you need explicit true/false values
 - Database fields that expect 1/0 or yes/no
 - APIs that require explicit false values instead of omitted fields
+
+### Component Isolation: Line Item Calculation
+
+This example demonstrates the power of `hx-name` vs `name` separation - multiple isolated components with reusable input names inside a single form:
+
+```html
+<form hx-post="/checkout" hx-ext="scoped-inputs">
+  <h2>Shopping Cart</h2>
+
+  <!-- Line Item 1 -->
+  <div class="line-item">
+    <h3>Product A</h3>
+    <label>
+      Quantity:
+      <input type="number" hx-name="quantity" class="item-1" value="2" min="1">
+    </label>
+    <label>
+      Price:
+      <input type="number" hx-name="price" class="item-1" value="10.00" step="0.01" readonly>
+    </label>
+    <button hx-post="/calculate" hx-scope=".item-1" hx-target="#line-1-total">
+      Calculate Line Total
+    </button>
+    <div id="line-1-total">
+      Total: $<span id="total-1-value">20.00</span>
+    </div>
+    <!-- This hidden input uses 'name' so it's submitted with checkout -->
+    <input type="hidden" name="line_total_1" id="line-1-hidden" value="20.00">
+    <input type="hidden" name="product_id_1" value="prod_a">
+  </div>
+
+  <!-- Line Item 2 - Same input names, different scope! -->
+  <div class="line-item">
+    <h3>Product B</h3>
+    <label>
+      Quantity:
+      <input type="number" hx-name="quantity" class="item-2" value="1" min="1">
+    </label>
+    <label>
+      Price:
+      <input type="number" hx-name="price" class="item-2" value="15.00" step="0.01" readonly>
+    </label>
+    <button hx-post="/calculate" hx-scope=".item-2" hx-target="#line-2-total">
+      Calculate Line Total
+    </button>
+    <div id="line-2-total">
+      Total: $<span id="total-2-value">15.00</span>
+    </div>
+    <input type="hidden" name="line_total_2" id="line-2-hidden" value="15.00">
+    <input type="hidden" name="product_id_2" value="prod_b">
+  </div>
+
+  <!-- Line Item 3 -->
+  <div class="line-item">
+    <h3>Product C</h3>
+    <label>
+      Quantity:
+      <input type="number" hx-name="quantity" class="item-3" value="3" min="1">
+    </label>
+    <label>
+      Price:
+      <input type="number" hx-name="price" class="item-3" value="7.50" step="0.01" readonly>
+    </label>
+    <button hx-post="/calculate" hx-scope=".item-3" hx-target="#line-3-total">
+      Calculate Line Total
+    </button>
+    <div id="line-3-total">
+      Total: $<span id="total-3-value">22.50</span>
+    </div>
+    <input type="hidden" name="line_total_3" id="line-3-hidden" value="22.50">
+    <input type="hidden" name="product_id_3" value="prod_c">
+  </div>
+
+  <hr>
+  <div>
+    <strong>Cart Total: $57.50</strong>
+  </div>
+
+  <button type="submit">Proceed to Checkout</button>
+</form>
+```
+
+**How it works:**
+
+1. **Component isolation**: Each line item uses `hx-name="quantity"` and `hx-name="price"` - the same names! This is possible because they're scoped to different classes (`.item-1`, `.item-2`, `.item-3`)
+
+2. **Intermediate calculations**: When you click "Calculate Line Total" on item 1:
+   - Only `.item-1` inputs are sent to `/calculate`
+   - Server calculates `quantity * price` and returns the result
+   - The hidden input `line_total_1` (with `name` attribute) is updated
+   - Other line items are unaffected
+
+3. **Form submission**: When you click "Proceed to Checkout":
+   - Form sends: `line_total_1=20.00&product_id_1=prod_a&line_total_2=15.00&product_id_2=prod_b&line_total_3=22.50&product_id_3=prod_c`
+   - **Does NOT send** the intermediate `quantity` and `price` values (they use `hx-name`, not `name`)
+
+**Backend example** (`/calculate` endpoint):
+```python
+@app.post("/calculate")
+def calculate(quantity: float, price: float):
+    total = quantity * price
+    return f"Total: ${total:.2f}"
+```
+
+**Why this matters:**
+- **Reusable component logic**: Each line item is self-contained with identical input names
+- **No naming conflicts**: Multiple components can coexist in the same form
+- **Clean form submission**: Only final calculated values are submitted, not intermediate inputs
+- **Progressive enhancement**: Each line item can calculate independently without affecting others
 
 ## Use Cases
 
