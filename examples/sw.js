@@ -5,11 +5,13 @@
 
 self.addEventListener('install', (event) => {
     console.log('Service Worker installing...');
+    // Force the waiting service worker to become the active service worker
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
     console.log('Service Worker activating...');
+    // Take control of all clients immediately
     event.waitUntil(clients.claim());
 });
 
@@ -27,13 +29,21 @@ self.addEventListener('fetch', (event) => {
 });
 
 async function handleCalculateRequest(request) {
-    // Parse the request body to get quantity and price
+    const url = new URL(request.url);
+
+    // Parse query parameters (for item_id and product_id)
     let params = {};
+    for (const [key, value] of url.searchParams) {
+        params[key] = value;
+    }
+
+    // Parse the request body to get quantity and price
     if (request.method === 'POST') {
         const contentType = request.headers.get('content-type') || '';
 
         if (contentType.includes('application/json')) {
-            params = await request.json();
+            const bodyParams = await request.json();
+            params = { ...params, ...bodyParams };
         } else if (contentType.includes('application/x-www-form-urlencoded')) {
             const formData = await request.formData();
             for (const [key, value] of formData) {
@@ -42,21 +52,30 @@ async function handleCalculateRequest(request) {
         }
     }
 
-    // Extract quantity and price, default to 0 if not provided
+    // Extract quantity, price, and item info
     const quantity = parseFloat(params.quantity) || 0;
     const price = parseFloat(params.price) || 0;
+    const itemId = params.item_id || '1';
+    const productId = params.product_id || 'unknown';
+    const productName = params.product_name || 'Product';
+
     const total = quantity * price;
 
-    // Format the response - just return the formatted total
-    // The hx-target will replace the content of the target element
-    const html = `Line Total: $${total.toFixed(2)}`;
+    // Return the complete result div with ID that will replace the target via outerHTML
+    // This includes both the display div and the hidden inputs with updated values
+    const html = `<div id="line-${itemId}-result">
+    <div style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+        Line Total: $${total.toFixed(2)}
+    </div>
+    <input type="hidden" name="line_total_${itemId}" id="line_total_${itemId}" value="${total.toFixed(2)}">
+    <input type="hidden" name="product_id_${itemId}" value="${productId}">
+</div>`;
 
     return new Response(html, {
         status: 200,
         headers: {
             'Content-Type': 'text/html',
-            'X-Demo-Response': 'true',
-            'X-Calculated-Total': total.toFixed(2)  // Send total as header for debugging
+            'X-Demo-Response': 'true'
         }
     });
 }

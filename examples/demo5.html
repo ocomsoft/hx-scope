@@ -148,108 +148,84 @@
             <h3 style="margin-top: 0;">Shopping Cart</h3>
 
             <!-- Line Item 1 -->
-            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <div class="line-item item-1" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
                 <h4 style="margin-top: 0; color: #1f2937;">Product A - Laptop <span class="scope-indicator">.item-1</span></h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
                     <div class="form-group">
                         <label>Quantity <span class="scope-indicator">hx-name</span></label>
-                        <input type="number" hx-name="quantity" class="item-1" value="2" min="1" style="width: 100%;">
+                        <input type="number" hx-name="quantity" value="2" min="1" style="width: 100%;">
                     </div>
                     <div class="form-group">
                         <label>Price ($) <span class="scope-indicator">hx-name</span></label>
-                        <input type="number" hx-name="price" class="item-1" value="899.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                        <input type="number" hx-name="price" value="899.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
                     </div>
                     <div class="form-group">
-                        <button
-                            hx-post="/calculate"
-                            hx-scope=".item-1"
-                            hx-target="#line-1-result"
-                            hx-on::after-request="
-                                const qty = document.querySelector('.item-1[hx-name=quantity]').value;
-                                const price = document.querySelector('.item-1[hx-name=price]').value;
-                                const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
-                                document.querySelector('[name=line_total_1]').value = total;
-                            "
-                            style="width: 100%; margin: 0;">
+                        <button hx-post="/calculate?item_id=1&product_id=laptop" hx-scope=".item-1 input[hx-name]" hx-target="#line-1-result" hx-swap="outerHTML" style="width: 100%; margin: 0;">
                             Calculate
                         </button>
                     </div>
                 </div>
-                <div id="line-1-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
-                    Line Total: $1,799.98
+                <div id="line-1-result">
+                    <div style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                        Line Total: $1,799.98
+                    </div>
+                    <input type="hidden" name="line_total_1" id="line_total_1" value="1799.98">
+                    <input type="hidden" name="product_id_1" value="laptop">
                 </div>
-                <input type="hidden" name="line_total_1" id="line_total_1" value="1799.98">
-                <input type="hidden" name="product_id_1" value="laptop">
             </div>
 
             <!-- Line Item 2 -->
-            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <div class="line-item item-2" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
                 <h4 style="margin-top: 0; color: #1f2937;">Product B - Mouse <span class="scope-indicator">.item-2</span></h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
                     <div class="form-group">
                         <label>Quantity <span class="scope-indicator">hx-name</span></label>
-                        <input type="number" hx-name="quantity" class="item-2" value="1" min="1" style="width: 100%;">
+                        <input type="number" hx-name="quantity" value="1" min="1" style="width: 100%;">
                     </div>
                     <div class="form-group">
                         <label>Price ($) <span class="scope-indicator">hx-name</span></label>
-                        <input type="number" hx-name="price" class="item-2" value="49.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                        <input type="number" hx-name="price" value="49.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
                     </div>
                     <div class="form-group">
-                        <button
-                            hx-post="/calculate"
-                            hx-scope=".item-2"
-                            hx-target="#line-2-result"
-                            hx-on::after-request="
-                                const qty = document.querySelector('.item-2[hx-name=quantity]').value;
-                                const price = document.querySelector('.item-2[hx-name=price]').value;
-                                const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
-                                document.querySelector('[name=line_total_2]').value = total;
-                            "
-                            style="width: 100%; margin: 0;">
+                        <button hx-post="/calculate?item_id=2&product_id=mouse" hx-scope=".item-2 input[hx-name]" hx-target="#line-2-result" hx-swap="outerHTML" style="width: 100%; margin: 0;">
                             Calculate
                         </button>
                     </div>
                 </div>
-                <div id="line-2-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
-                    Line Total: $49.99
+                <div id="line-2-result">
+                    <div style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                        Line Total: $49.99
+                    </div>
+                    <input type="hidden" name="line_total_2" id="line_total_2" value="49.99">
+                    <input type="hidden" name="product_id_2" value="mouse">
                 </div>
-                <input type="hidden" name="line_total_2" id="line_total_2" value="49.99">
-                <input type="hidden" name="product_id_2" value="mouse">
             </div>
 
             <!-- Line Item 3 -->
-            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+            <div class="line-item item-3" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
                 <h4 style="margin-top: 0; color: #1f2937;">Product C - Keyboard <span class="scope-indicator">.item-3</span></h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
                     <div class="form-group">
                         <label>Quantity <span class="scope-indicator">hx-name</span></label>
-                        <input type="number" hx-name="quantity" class="item-3" value="3" min="1" style="width: 100%;">
+                        <input type="number" hx-name="quantity" value="3" min="1" style="width: 100%;">
                     </div>
                     <div class="form-group">
                         <label>Price ($) <span class="scope-indicator">hx-name</span></label>
-                        <input type="number" hx-name="price" class="item-3" value="79.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                        <input type="number" hx-name="price" value="79.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
                     </div>
                     <div class="form-group">
-                        <button
-                            hx-post="/calculate"
-                            hx-scope=".item-3"
-                            hx-target="#line-3-result"
-                            hx-on::after-request="
-                                const qty = document.querySelector('.item-3[hx-name=quantity]').value;
-                                const price = document.querySelector('.item-3[hx-name=price]').value;
-                                const total = (parseFloat(qty) * parseFloat(price)).toFixed(2);
-                                document.querySelector('[name=line_total_3]').value = total;
-                            "
-                            style="width: 100%; margin: 0;">
+                        <button hx-post="/calculate?item_id=3&product_id=keyboard" hx-scope=".item-3 input[hx-name]" hx-target="#line-3-result" hx-swap="outerHTML" style="width: 100%; margin: 0;">
                             Calculate
                         </button>
                     </div>
                 </div>
-                <div id="line-3-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
-                    Line Total: $239.97
+                <div id="line-3-result">
+                    <div style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                        Line Total: $239.97
+                    </div>
+                    <input type="hidden" name="line_total_3" id="line_total_3" value="239.97">
+                    <input type="hidden" name="product_id_3" value="keyboard">
                 </div>
-                <input type="hidden" name="line_total_3" id="line_total_3" value="239.97">
-                <input type="hidden" name="product_id_3" value="keyboard">
             </div>
 
             <hr style="margin: 20px 0;">
@@ -258,7 +234,7 @@
                 Cart Total: $2,089.94
             </div>
 
-            <button type="button" hx-post="/api/checkout" hx-target="#checkout-result" style="background: #059669; font-size: 16px;">
+            <button type="button" hx-post="/api/checkout" hx-include="[name]" hx-target="#checkout-result" style="background: #059669; font-size: 16px;">
                 Proceed to Checkout (Submit Form Data)
             </button>
 
@@ -280,14 +256,39 @@
     <script>
         // Register service worker to intercept API requests
         if ('serviceWorker' in navigator) {
+            let reloadOnce = false;
+
             window.addEventListener('load', async () => {
                 try {
                     const registration = await navigator.serviceWorker.register('./sw.js');
                     console.log('Service Worker registered:', registration);
 
+                    // Check for updates on page load
+                    registration.update();
+
+                    // Listen for new service worker taking over
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'activated' && !navigator.serviceWorker.controller) {
+                                console.log('New Service Worker activated, reloading page...');
+                                window.location.reload();
+                            }
+                        });
+                    });
+
                     // Wait for service worker to be ready
                     await navigator.serviceWorker.ready;
                     console.log('Service Worker ready!');
+
+                    // If this is the first visit and SW just got ready, reload to let it take control
+                    if (!navigator.serviceWorker.controller && !reloadOnce) {
+                        reloadOnce = true;
+                        console.log('First visit - reloading to activate Service Worker...');
+                        sessionStorage.setItem('sw-reloaded', 'true');
+                        window.location.reload();
+                        return;
+                    }
 
                     const note = document.querySelector('.note');
                     if (note) {
@@ -310,11 +311,7 @@
             if (navigator.serviceWorker.controller) {
                 console.log('Service Worker already controlling the page');
             } else {
-                console.log('Service Worker NOT controlling the page - page needs to be reloaded');
-                const reloadNote = document.getElementById('reload-note');
-                if (reloadNote) {
-                    reloadNote.style.display = 'inline';
-                }
+                console.log('Service Worker NOT controlling the page yet');
             }
         } else {
             console.error('Service Workers not supported in this browser');

@@ -179,14 +179,39 @@
     <script>
         // Register service worker to intercept API requests
         if ('serviceWorker' in navigator) {
+            let reloadOnce = false;
+
             window.addEventListener('load', async () => {
                 try {
                     const registration = await navigator.serviceWorker.register('./sw.js');
                     console.log('Service Worker registered:', registration);
 
+                    // Check for updates on page load
+                    registration.update();
+
+                    // Listen for new service worker taking over
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'activated' && !navigator.serviceWorker.controller) {
+                                console.log('New Service Worker activated, reloading page...');
+                                window.location.reload();
+                            }
+                        });
+                    });
+
                     // Wait for service worker to be ready
                     await navigator.serviceWorker.ready;
                     console.log('Service Worker ready!');
+
+                    // If this is the first visit and SW just got ready, reload to let it take control
+                    if (!navigator.serviceWorker.controller && !reloadOnce) {
+                        reloadOnce = true;
+                        console.log('First visit - reloading to activate Service Worker...');
+                        sessionStorage.setItem('sw-reloaded', 'true');
+                        window.location.reload();
+                        return;
+                    }
 
                     const note = document.querySelector('.note');
                     if (note) {
@@ -209,11 +234,7 @@
             if (navigator.serviceWorker.controller) {
                 console.log('Service Worker already controlling the page');
             } else {
-                console.log('Service Worker NOT controlling the page - page needs to be reloaded');
-                const reloadNote = document.getElementById('reload-note');
-                if (reloadNote) {
-                    reloadNote.style.display = 'inline';
-                }
+                console.log('Service Worker NOT controlling the page yet');
             }
         } else {
             console.error('Service Workers not supported in this browser');
