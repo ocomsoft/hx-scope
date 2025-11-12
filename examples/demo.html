@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hx-scope Demo</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="../hx-scope.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-section h2 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px 5px 5px 0;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:active {
+            background: #1d4ed8;
+        }
+        .scope-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .response:empty {
+            display: none;
+        }
+        code {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>hx-scope Extension Demo</h1>
+
+    <div class="note">
+        <strong>Note:</strong> This demo uses mock endpoints that will show what parameters would be sent.
+        In a real application, these would be actual server endpoints.
+    </div>
+
+    <!-- Demo 1: Basic Scoping -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 1: Basic Scoping</h2>
+        <p>Two separate forms on the same page. Each button only submits inputs from its own scope.</p>
+
+        <div class="form-group">
+            <label>Username <span class="scope-indicator">user-form</span></label>
+            <input type="text" hx-name="username" hx-scope="user-form" value="john_doe" placeholder="Enter username">
+        </div>
+
+        <div class="form-group">
+            <label>Email <span class="scope-indicator">user-form</span></label>
+            <input type="email" hx-name="email" hx-scope="user-form" value="john@example.com" placeholder="Enter email">
+        </div>
+
+        <button hx-post="/api/user" hx-scope="user-form" hx-target="#response1">
+            Submit User Form
+        </button>
+
+        <hr style="margin: 20px 0;">
+
+        <div class="form-group">
+            <label>Newsletter Email <span class="scope-indicator">newsletter</span></label>
+            <input type="email" hx-name="email" hx-scope="newsletter" value="newsletter@example.com" placeholder="Enter email">
+        </div>
+
+        <div class="form-group">
+            <label>Preferences <span class="scope-indicator">newsletter</span></label>
+            <select hx-name="frequency" hx-scope="newsletter">
+                <option value="daily">Daily</option>
+                <option value="weekly" selected>Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+        </div>
+
+        <button hx-post="/api/newsletter" hx-scope="newsletter" hx-target="#response1">
+            Subscribe to Newsletter
+        </button>
+
+        <div id="response1" class="response"></div>
+    </div>
+
+    <!-- Demo 2: Multiple Scopes -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 2: Multiple Scopes</h2>
+        <p>Inputs and buttons can belong to multiple scopes simultaneously.</p>
+
+        <div class="form-group">
+            <label>First Name <span class="scope-indicator">profile</span></label>
+            <input type="text" hx-name="first_name" hx-scope="profile" value="John" placeholder="First name">
+        </div>
+
+        <div class="form-group">
+            <label>Last Name <span class="scope-indicator">profile</span></label>
+            <input type="text" hx-name="last_name" hx-scope="profile" value="Doe" placeholder="Last name">
+        </div>
+
+        <div class="form-group">
+            <label>Bio <span class="scope-indicator">profile</span> <span class="scope-indicator">extended</span></label>
+            <textarea hx-name="bio" hx-scope="profile extended" rows="3" placeholder="Tell us about yourself">Software developer passionate about web technologies.</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Website <span class="scope-indicator">extended</span></label>
+            <input type="url" hx-name="website" hx-scope="extended" value="https://example.com" placeholder="Your website">
+        </div>
+
+        <button hx-post="/api/profile/basic" hx-scope="profile" hx-target="#response2">
+            Save Basic Profile (profile scope only)
+        </button>
+
+        <button hx-post="/api/profile/full" hx-scope="profile extended" hx-target="#response2">
+            Save Full Profile (profile + extended scopes)
+        </button>
+
+        <div id="response2" class="response"></div>
+    </div>
+
+    <!-- Demo 3: Always-Included Inputs -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 3: Always-Included Inputs</h2>
+        <p>Inputs without a scope are always included in all requests.</p>
+
+        <div class="form-group">
+            <label>Action Type <span class="scope-indicator">action-a</span></label>
+            <input type="text" hx-name="action_type" hx-scope="action-a" value="create" placeholder="Action type">
+        </div>
+
+        <div class="form-group">
+            <label>Settings <span class="scope-indicator">action-b</span></label>
+            <input type="text" hx-name="settings" hx-scope="action-b" value="enabled" placeholder="Settings">
+        </div>
+
+        <div class="form-group">
+            <label>Session Token <span class="scope-indicator">always included</span></label>
+            <input type="text" hx-name="session_token" value="abc123xyz" placeholder="Session token" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>Timestamp <span class="scope-indicator">always included</span></label>
+            <input type="text" hx-name="timestamp" value="2025-11-12T10:30:00Z" placeholder="Timestamp" readonly>
+        </div>
+
+        <button hx-post="/api/action/a" hx-scope="action-a" hx-target="#response3">
+            Execute Action A (includes action_type + global fields)
+        </button>
+
+        <button hx-post="/api/action/b" hx-scope="action-b" hx-target="#response3">
+            Execute Action B (includes settings + global fields)
+        </button>
+
+        <div id="response3" class="response"></div>
+    </div>
+
+    <!-- Mock server simulation script -->
+    <script>
+        // Intercept HTMX requests and show what would be sent
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            console.log('Request configured:', evt.detail);
+        });
+
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+            // Prevent actual request
+            evt.preventDefault();
+
+            const target = evt.detail.target;
+            const params = evt.detail.xhr.parameters || {};
+
+            // Get the actual parameters that would be sent
+            const formData = new FormData();
+            for (const [key, value] of Object.entries(evt.detail.parameters)) {
+                formData.append(key, value);
+            }
+
+            // Display the parameters
+            const responseDiv = document.querySelector(evt.detail.target.getAttribute('hx-target'));
+            if (responseDiv) {
+                const paramsObj = {};
+                for (const [key, value] of Object.entries(evt.detail.parameters)) {
+                    paramsObj[key] = value;
+                }
+
+                responseDiv.innerHTML = `
+                    <strong>Request would be sent to:</strong> ${evt.detail.path}<br>
+                    <strong>Method:</strong> ${evt.detail.verb}<br>
+                    <strong>Parameters:</strong><br>
+                    <pre>${JSON.stringify(paramsObj, null, 2)}</pre>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

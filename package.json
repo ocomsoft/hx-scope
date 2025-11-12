@@ -1,0 +1,29 @@
+{
+  "name": "hx-scope",
+  "version": "1.0.0",
+  "description": "An HTMX extension for scoped attribute inheritance",
+  "main": "hx-scope.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ocomsoft/hx-scope.git"
+  },
+  "keywords": [
+    "htmx",
+    "extension",
+    "scope",
+    "frontend",
+    "html"
+  ],
+  "author": "ocomsoft",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ocomsoft/hx-scope/issues"
+  },
+  "homepage": "https://github.com/ocomsoft/hx-scope#readme",
+  "peerDependencies": {
+    "htmx.org": ">=1.9.0"
+  }
+}
