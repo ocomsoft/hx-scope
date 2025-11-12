@@ -25,14 +25,16 @@
   htmx.defineExtension('scoped-inputs', {
     onEvent: function(name, evt) {
       if (name === 'htmx:configRequest') {
-        const target = evt.detail.target;
-        const scopeSelector = target.getAttribute('hx-scope');
+        // evt.detail.elt is the element that triggered the request (has hx-post, hx-scope, etc.)
+        // evt.detail.target is the swap target (where response goes)
+        const triggeringElement = evt.detail.elt;
+        const scopeSelector = triggeringElement.getAttribute('hx-scope');
 
-        // Only run if target has hx-scope attribute
+        // Only run if triggering element has hx-scope attribute
         if (!scopeSelector) return;
 
-        // Search within the closest form, or target's parent element, or document
-        const searchRoot = target.closest('form') || target.parentElement || document;
+        // Search within the closest form, or triggering element's parent, or document
+        const searchRoot = triggeringElement.closest('form') || triggeringElement.parentElement || document;
 
         try {
           // Use the hx-scope value as a CSS selector

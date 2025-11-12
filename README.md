@@ -131,7 +131,10 @@ Interactive demos are available in the `examples/` directory. To run them:
 ```bash
 # Clone the repository
 git clone https://github.com/ocomsoft/hx-scope.git
-cd hx-scope/examples
+cd hx-scope
+
+# IMPORTANT: Start the web server from the ROOT directory (hx-scope/), not examples/
+# This ensures the demos can load ../hx-scope.js correctly
 
 # Start a local web server (choose one):
 python -m http.server 8000
@@ -140,10 +143,13 @@ npx serve
 # or
 php -S localhost:8000
 
-# Then open http://localhost:8000/ in your browser
+# Then open http://localhost:8000/examples/ in your browser
 ```
 
-The demos use a Service Worker to intercept and display request details, so they must be served from a web server (opening files directly won't work).
+**Important Notes:**
+- The demos use a Service Worker to intercept and display request details, so they must be served from a web server (opening files directly with `file://` won't work)
+- **Run the server from the root `hx-scope/` directory**, not from `examples/`
+- Access the demos at `http://localhost:8000/examples/` (note the `/examples/` path)
 
 ### Available Demos
 
