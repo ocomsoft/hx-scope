@@ -47,6 +47,51 @@ This enables **component isolation** within forms:
 </form>
 ```
 
+### Visual Flow Diagram
+
+```mermaid
+graph TB
+    subgraph Form["&lt;form hx-post='/checkout'&gt;"]
+        subgraph Item1["Line Item 1 (Component)"]
+            Q1["<b>hx-name</b>='quantity'<br/>class='item-1'<br/>❌ Excluded from form"]
+            P1["<b>hx-name</b>='price'<br/>class='item-1'<br/>❌ Excluded from form"]
+            Calc1["Calculate Button<br/><b>hx-scope</b>='.item-1'"]
+            Total1["<b>name</b>='line_total_1'<br/>✅ Included in form"]
+        end
+
+        subgraph Item2["Line Item 2 (Component)"]
+            Q2["<b>hx-name</b>='quantity'<br/>class='item-2'<br/>❌ Excluded from form"]
+            P2["<b>hx-name</b>='price'<br/>class='item-2'<br/>❌ Excluded from form"]
+            Calc2["Calculate Button<br/><b>hx-scope</b>='.item-2'"]
+            Total2["<b>name</b>='line_total_2'<br/>✅ Included in form"]
+        end
+
+        Submit["Checkout Button"]
+    end
+
+    Calc1 -->|"Sends only<br/>quantity + price<br/>from .item-1"| API1["/calculate"]
+    Calc2 -->|"Sends only<br/>quantity + price<br/>from .item-2"| API2["/calculate"]
+    Submit -->|"Sends only<br/>line_total_1<br/>+ line_total_2"| Checkout["/checkout"]
+
+    API1 -.->|"Updates"| Total1
+    API2 -.->|"Updates"| Total2
+
+    style Q1 fill:#fee2e2,stroke:#dc2626
+    style P1 fill:#fee2e2,stroke:#dc2626
+    style Q2 fill:#fee2e2,stroke:#dc2626
+    style P2 fill:#fee2e2,stroke:#dc2626
+    style Total1 fill:#d1fae5,stroke:#22c55e
+    style Total2 fill:#d1fae5,stroke:#22c55e
+    style Calc1 fill:#dbeafe,stroke:#3b82f6
+    style Calc2 fill:#dbeafe,stroke:#3b82f6
+    style Submit fill:#dbeafe,stroke:#3b82f6
+```
+
+**Legend:**
+- 🔴 Red boxes (`hx-name`) = Excluded from parent form, only included via `hx-scope`
+- 🟢 Green boxes (`name`) = Included in standard form submission
+- 🔵 Blue boxes = Buttons with different scope targets
+
 **What happens:**
 1. Click "Calculate" on item 1 → Only sends `quantity` and `price` from `.item-1` to `/calculate`
 2. Server returns updated total → Updates `line_total_1` hidden input
