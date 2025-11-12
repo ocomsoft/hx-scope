@@ -79,9 +79,9 @@ Then include in your HTML:
 <script src="node_modules/hx-scope/hx-scope.js"></script>
 ```
 
-## Try the Demo
+## Try the Demos
 
-An interactive demo is available in the `examples/` directory. To run it:
+Interactive demos are available in the `examples/` directory. To run them:
 
 ```bash
 # Clone the repository
@@ -95,10 +95,27 @@ npx serve
 # or
 php -S localhost:8000
 
-# Then open http://localhost:8000/demo.html in your browser
+# Then open http://localhost:8000/ in your browser
 ```
 
-The demo uses a Service Worker to intercept and display request details, so it must be served from a web server (opening the file directly won't work).
+The demos use a Service Worker to intercept and display request details, so they must be served from a web server (opening files directly won't work).
+
+### Available Demos
+
+1. **[Demo 1: Basic CSS Class Selectors](examples/demo1.html)**
+   Two separate forms on the same page using class selectors
+
+2. **[Demo 2: Multiple Selectors](examples/demo2.html)**
+   Comma-separated CSS selectors to include inputs from multiple groups
+
+3. **[Demo 3: Attribute Selectors & Combining Selectors](examples/demo3.html)**
+   Attribute selectors and combining them with classes
+
+4. **[Demo 4: Checkbox hx-off-value Feature](examples/demo4.html)**
+   Using `hx-off-value` to send specific values when checkboxes are unchecked
+
+5. **[Demo 5: Component Isolation - Line Item Calculation](examples/demo5.html)** ⭐
+   **The killer feature!** Multiple isolated components with reusable input names inside a single form
 
 ## Usage
 

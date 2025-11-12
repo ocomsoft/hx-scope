@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo 2: Multiple Selectors - hx-scope</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="../hx-scope.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #3b82f6;
+            text-decoration: none;
+            margin-right: 15px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-section h2 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px 5px 5px 0;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:active {
+            background: #1d4ed8;
+        }
+        .scope-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .response:empty {
+            display: none;
+        }
+        code {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Demo 2: Multiple Selectors (Comma-Separated)</h1>
+
+    <div class="nav">
+        <a href="index.html">← All Demos</a>
+        <a href="demo1.html">← Previous</a>
+        <a href="demo3.html">Next: Attribute Selectors →</a>
+    </div>
+
+    <div class="note">
+        <strong>Note:</strong> This demo uses a Service Worker to intercept requests and display the parameters being sent.
+    </div>
+
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Multiple Selectors (Comma-Separated)</h2>
+        <p>Use comma-separated CSS selectors to include inputs from multiple groups.</p>
+
+        <div class="form-group">
+            <label>First Name <span class="scope-indicator">.profile</span></label>
+            <input type="text" hx-name="first_name" class="profile" value="John" placeholder="First name">
+        </div>
+
+        <div class="form-group">
+            <label>Last Name <span class="scope-indicator">.profile</span></label>
+            <input type="text" hx-name="last_name" class="profile" value="Doe" placeholder="Last name">
+        </div>
+
+        <div class="form-group">
+            <label>Bio <span class="scope-indicator">.profile .extended</span></label>
+            <textarea hx-name="bio" class="profile extended" rows="3" placeholder="Tell us about yourself">Software developer passionate about web technologies.</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Website <span class="scope-indicator">.extended</span></label>
+            <input type="url" hx-name="website" class="extended" value="https://example.com" placeholder="Your website">
+        </div>
+
+        <button hx-post="/api/profile/basic" hx-scope=".profile" hx-target="#response2">
+            Save Basic Profile (selector: .profile)
+        </button>
+
+        <button hx-post="/api/profile/full" hx-scope=".profile, .extended" hx-target="#response2">
+            Save Full Profile (selector: .profile, .extended)
+        </button>
+
+        <div id="response2" class="response"></div>
+    </div>
+
+    <script>
+        // Register service worker to intercept API requests
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('Service Worker registered:', registration);
+                    await navigator.serviceWorker.ready;
+
+                    const note = document.querySelector('.note');
+                    if (note) {
+                        note.innerHTML = '<strong>Service Worker Active!</strong> Requests are being intercepted and their details are shown below each button click.';
+                        note.style.background = '#d1fae5';
+                        note.style.borderColor = '#22c55e';
+                    }
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
