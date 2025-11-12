@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hx-scope Demo</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="../hx-scope.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-section h2 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px 5px 5px 0;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:active {
+            background: #1d4ed8;
+        }
+        .scope-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .response:empty {
+            display: none;
+        }
+        code {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>hx-scope Extension Demo</h1>
+
+    <div class="note">
+        <strong>Note:</strong> This demo uses a Service Worker to intercept requests and display the parameters being sent.
+        You must serve this file from a web server (e.g., <code>python -m http.server</code> or <code>npx serve</code>) for the Service Worker to work.
+        Opening the file directly (file://) will not work.
+    </div>
+
+    <!-- Demo 1: Basic CSS Class Selectors -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 1: Basic CSS Class Selectors</h2>
+        <p>Two separate forms on the same page. Each button uses a CSS selector to include only its inputs.</p>
+
+        <div class="form-group">
+            <label>Username <span class="scope-indicator">.user-form</span></label>
+            <input type="text" hx-name="username" class="user-form" value="john_doe" placeholder="Enter username">
+        </div>
+
+        <div class="form-group">
+            <label>Email <span class="scope-indicator">.user-form</span></label>
+            <input type="email" hx-name="email" class="user-form" value="john@example.com" placeholder="Enter email">
+        </div>
+
+        <button hx-post="/api/user" hx-scope=".user-form" hx-target="#response1">
+            Submit User Form (selector: .user-form)
+        </button>
+
+        <hr style="margin: 20px 0;">
+
+        <div class="form-group">
+            <label>Newsletter Email <span class="scope-indicator">.newsletter</span></label>
+            <input type="email" hx-name="email" class="newsletter" value="newsletter@example.com" placeholder="Enter email">
+        </div>
+
+        <div class="form-group">
+            <label>Preferences <span class="scope-indicator">.newsletter</span></label>
+            <select hx-name="frequency" class="newsletter">
+                <option value="daily">Daily</option>
+                <option value="weekly" selected>Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+        </div>
+
+        <button hx-post="/api/newsletter" hx-scope=".newsletter" hx-target="#response1">
+            Subscribe to Newsletter (selector: .newsletter)
+        </button>
+
+        <div id="response1" class="response"></div>
+    </div>
+
+    <!-- Demo 2: Multiple Selectors (Comma-Separated) -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 2: Multiple Selectors (Comma-Separated)</h2>
+        <p>Use comma-separated CSS selectors to include inputs from multiple groups.</p>
+
+        <div class="form-group">
+            <label>First Name <span class="scope-indicator">.profile</span></label>
+            <input type="text" hx-name="first_name" class="profile" value="John" placeholder="First name">
+        </div>
+
+        <div class="form-group">
+            <label>Last Name <span class="scope-indicator">.profile</span></label>
+            <input type="text" hx-name="last_name" class="profile" value="Doe" placeholder="Last name">
+        </div>
+
+        <div class="form-group">
+            <label>Bio <span class="scope-indicator">.profile .extended</span></label>
+            <textarea hx-name="bio" class="profile extended" rows="3" placeholder="Tell us about yourself">Software developer passionate about web technologies.</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Website <span class="scope-indicator">.extended</span></label>
+            <input type="url" hx-name="website" class="extended" value="https://example.com" placeholder="Your website">
+        </div>
+
+        <button hx-post="/api/profile/basic" hx-scope=".profile" hx-target="#response2">
+            Save Basic Profile (selector: .profile)
+        </button>
+
+        <button hx-post="/api/profile/full" hx-scope=".profile, .extended" hx-target="#response2">
+            Save Full Profile (selector: .profile, .extended)
+        </button>
+
+        <div id="response2" class="response"></div>
+    </div>
+
+    <!-- Demo 3: Attribute Selectors & Combining Selectors -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 3: Attribute Selectors & Combining Selectors</h2>
+        <p>Use attribute selectors and combine them with classes for powerful selection logic.</p>
+
+        <div class="form-group">
+            <label>Action Type <span class="scope-indicator">[data-action="a"]</span></label>
+            <input type="text" hx-name="action_type" data-action="a" value="create" placeholder="Action type">
+        </div>
+
+        <div class="form-group">
+            <label>Settings <span class="scope-indicator">[data-action="b"]</span></label>
+            <input type="text" hx-name="settings" data-action="b" value="enabled" placeholder="Settings">
+        </div>
+
+        <div class="form-group">
+            <label>Session Token <span class="scope-indicator">.global</span></label>
+            <input type="text" hx-name="session_token" class="global" value="abc123xyz" placeholder="Session token" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>Timestamp <span class="scope-indicator">.global</span></label>
+            <input type="text" hx-name="timestamp" class="global" value="2025-11-12T10:30:00Z" placeholder="Timestamp" readonly>
+        </div>
+
+        <button hx-post="/api/action/a" hx-scope="[data-action='a']" hx-target="#response3">
+            Action A Only (selector: [data-action='a'])
+        </button>
+
+        <button hx-post="/api/action/b" hx-scope="[data-action='b'], .global" hx-target="#response3">
+            Action B + Global (selector: [data-action='b'], .global)
+        </button>
+
+        <button hx-post="/api/action/all" hx-scope="[data-action], .global" hx-target="#response3">
+            All Actions + Global (selector: [data-action], .global)
+        </button>
+
+        <div id="response3" class="response"></div>
+    </div>
+
+    <!-- Demo 4: Checkbox hx-off-value Feature -->
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Demo 4: Checkbox hx-off-value Feature</h2>
+        <p>Use <code>hx-off-value</code> to send a specific value when checkboxes are unchecked.</p>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="notifications" class="settings" hx-off-value="0" value="1" checked>
+                Enable Notifications <span class="scope-indicator">with hx-off-value="0"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="newsletter" class="settings" hx-off-value="false" value="true">
+                Subscribe to Newsletter <span class="scope-indicator">with hx-off-value="false"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="dark_mode" class="settings" hx-off-value="no" value="yes" checked>
+                Dark Mode <span class="scope-indicator">with hx-off-value="no"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="terms_accepted" class="settings" value="1">
+                Accept Terms <span class="scope-indicator">without hx-off-value</span>
+            </label>
+        </div>
+
+        <button hx-post="/api/settings" hx-scope=".settings" hx-target="#response4">
+            Save Settings
+        </button>
+
+        <div id="response4" class="response"></div>
+
+        <div style="margin-top: 15px; padding: 10px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 13px;">
+            <strong>Note:</strong> Toggle the checkboxes and click "Save Settings" to see how:
+            <ul style="margin: 8px 0; padding-left: 20px;">
+                <li>Checked boxes send their <code>value</code> attribute</li>
+                <li>Unchecked boxes with <code>hx-off-value</code> send that value</li>
+                <li>Unchecked boxes without <code>hx-off-value</code> send nothing</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Demo 5: Component Isolation - Line Item Calculation -->
+    <div class="demo-section">
+        <h2>Demo 5: Component Isolation - Line Item Calculation</h2>
+        <p>This demonstrates the <strong>killer feature</strong>: Using <code>hx-name</code> (excluded from form) vs <code>name</code> (included in form) for component isolation.</p>
+
+        <div class="note" style="background: #e0f2fe; border-color: #0284c7; margin-bottom: 20px;">
+            <strong>Key Concept:</strong> Each line item uses <code>hx-name="quantity"</code> and <code>hx-name="price"</code> - the same names!
+            These are <strong>NOT</strong> submitted with the form. Only the calculated totals (with <code>name</code> attribute) are submitted.
+        </div>
+
+        <form hx-ext="scoped-inputs" id="checkout-form">
+            <h3 style="margin-top: 0;">Shopping Cart</h3>
+
+            <!-- Line Item 1 -->
+            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+                <h4 style="margin-top: 0; color: #1f2937;">Product A - Laptop <span class="scope-indicator">.item-1</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label>Quantity <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="quantity" class="item-1" value="2" min="1" style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($) <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="price" class="item-1" value="899.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <button hx-post="/calculate" hx-scope=".item-1" hx-target="#line-1-result" style="width: 100%; margin: 0;">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+                <div id="line-1-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                    Line Total: $1,799.98
+                </div>
+                <input type="hidden" name="line_total_1" value="1799.98">
+                <input type="hidden" name="product_id_1" value="laptop">
+            </div>
+
+            <!-- Line Item 2 -->
+            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+                <h4 style="margin-top: 0; color: #1f2937;">Product B - Mouse <span class="scope-indicator">.item-2</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label>Quantity <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="quantity" class="item-2" value="1" min="1" style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($) <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="price" class="item-2" value="49.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <button hx-post="/calculate" hx-scope=".item-2" hx-target="#line-2-result" style="width: 100%; margin: 0;">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+                <div id="line-2-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                    Line Total: $49.99
+                </div>
+                <input type="hidden" name="line_total_2" value="49.99">
+                <input type="hidden" name="product_id_2" value="mouse">
+            </div>
+
+            <!-- Line Item 3 -->
+            <div class="line-item" style="background: #f9fafb; padding: 15px; margin: 15px 0; border-radius: 6px; border: 1px solid #e5e7eb;">
+                <h4 style="margin-top: 0; color: #1f2937;">Product C - Keyboard <span class="scope-indicator">.item-3</span></h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
+                    <div class="form-group">
+                        <label>Quantity <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="quantity" class="item-3" value="3" min="1" style="width: 100%;">
+                    </div>
+                    <div class="form-group">
+                        <label>Price ($) <span class="scope-indicator">hx-name</span></label>
+                        <input type="number" hx-name="price" class="item-3" value="79.99" step="0.01" readonly style="width: 100%; background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <button hx-post="/calculate" hx-scope=".item-3" hx-target="#line-3-result" style="width: 100%; margin: 0;">
+                            Calculate
+                        </button>
+                    </div>
+                </div>
+                <div id="line-3-result" style="margin-top: 10px; font-size: 16px; font-weight: 500; color: #059669;">
+                    Line Total: $239.97
+                </div>
+                <input type="hidden" name="line_total_3" value="239.97">
+                <input type="hidden" name="product_id_3" value="keyboard">
+            </div>
+
+            <hr style="margin: 20px 0;">
+
+            <div style="text-align: right; font-size: 18px; font-weight: 600; margin: 20px 0;">
+                Cart Total: $2,089.94
+            </div>
+
+            <button type="button" hx-post="/api/checkout" hx-target="#checkout-result" style="background: #059669; font-size: 16px;">
+                Proceed to Checkout (Submit Form Data)
+            </button>
+
+            <div id="checkout-result" class="response"></div>
+        </form>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 13px;">
+            <strong>What's happening:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>Calculate buttons:</strong> Use <code>hx-scope</code> to send only <code>quantity</code> and <code>price</code> from their specific line item to <code>/calculate</code></li>
+                <li><strong>Each line item:</strong> Uses the same <code>hx-name="quantity"</code> and <code>hx-name="price"</code> - no conflicts!</li>
+                <li><strong>Checkout button:</strong> Only sends the hidden inputs with <code>name</code> attribute: <code>line_total_1</code>, <code>product_id_1</code>, <code>line_total_2</code>, etc.</li>
+                <li><strong>NOT sent on checkout:</strong> The intermediate <code>quantity</code> and <code>price</code> values (they use <code>hx-name</code>, not <code>name</code>)</li>
+            </ul>
+            <p style="margin: 10px 0 0 0;"><strong>Try it:</strong> Change a quantity, click Calculate to update that line's total, then click Checkout to see only the final totals are submitted!</p>
+        </div>
+    </div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Register service worker to intercept API requests
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('Service Worker registered:', registration);
+
+                    // Wait for service worker to be ready
+                    await navigator.serviceWorker.ready;
+                    console.log('Service Worker is ready and will intercept /api/* requests');
+
+                    // Show a message to the user
+                    const note = document.querySelector('.note');
+                    if (note) {
+                        note.innerHTML = '<strong>Service Worker Active!</strong> All requests to /api/* endpoints are being intercepted and their details are shown below each button click.';
+                        note.style.background = '#d1fae5';
+                        note.style.borderColor = '#22c55e';
+                    }
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                    const note = document.querySelector('.note');
+                    if (note) {
+                        note.innerHTML = '<strong>Note:</strong> Service Worker registration failed. This demo requires a web server (use <code>python -m http.server</code> or similar).';
+                    }
+                }
+            });
+        } else {
+            console.warn('Service Workers are not supported in this browser');
+            const note = document.querySelector('.note');
+            if (note) {
+                note.innerHTML = '<strong>Warning:</strong> Service Workers are not supported in this browser. The demo may not work correctly.';
+                note.style.background = '#fee2e2';
+                note.style.borderColor = '#ef4444';
+            }
+        }
+
+        // Log HTMX events for debugging
+        document.body.addEventListener('htmx:configRequest', function(evt) {
+            console.log('HTMX Request configured:', {
+                path: evt.detail.path,
+                verb: evt.detail.verb,
+                parameters: evt.detail.parameters
+            });
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            console.log('HTMX Request completed:', {
+                path: evt.detail.pathInfo.requestPath,
+                successful: evt.detail.successful
+            });
+        });
+    </script>
+</body>
+</html>

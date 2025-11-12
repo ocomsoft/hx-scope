@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo 4: Checkbox hx-off-value - hx-scope</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="../hx-scope.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 10px;
+        }
+        .nav {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav a {
+            color: #3b82f6;
+            text-decoration: none;
+            margin-right: 15px;
+            font-weight: 500;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        .demo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .demo-section h2 {
+            margin-top: 0;
+            color: #1f2937;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px 5px 5px 0;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:active {
+            background: #1d4ed8;
+        }
+        .scope-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .response:empty {
+            display: none;
+        }
+        code {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Demo 4: Checkbox hx-off-value Feature</h1>
+
+    <div class="nav">
+        <a href="index.html">← All Demos</a>
+        <a href="demo3.html">← Previous</a>
+        <a href="demo5.html">Next: Component Isolation →</a>
+    </div>
+
+    <div class="note">
+        <strong>Note:</strong> This demo uses a Service Worker to intercept requests and display the parameters being sent.
+    </div>
+
+    <div class="demo-section" hx-ext="scoped-inputs">
+        <h2>Checkbox hx-off-value Feature</h2>
+        <p>Use <code>hx-off-value</code> to send a specific value when checkboxes are unchecked.</p>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="notifications" class="settings" hx-off-value="0" value="1" checked>
+                Enable Notifications <span class="scope-indicator">with hx-off-value="0"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="newsletter" class="settings" hx-off-value="false" value="true">
+                Subscribe to Newsletter <span class="scope-indicator">with hx-off-value="false"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="dark_mode" class="settings" hx-off-value="no" value="yes" checked>
+                Dark Mode <span class="scope-indicator">with hx-off-value="no"</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" hx-name="terms_accepted" class="settings" value="1">
+                Accept Terms <span class="scope-indicator">without hx-off-value</span>
+            </label>
+        </div>
+
+        <button hx-post="/api/settings" hx-scope=".settings" hx-target="#response4">
+            Save Settings
+        </button>
+
+        <div id="response4" class="response"></div>
+
+        <div style="margin-top: 15px; padding: 10px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 13px;">
+            <strong>Note:</strong> Toggle the checkboxes and click "Save Settings" to see how:
+            <ul style="margin: 8px 0; padding-left: 20px;">
+                <li>Checked boxes send their <code>value</code> attribute</li>
+                <li>Unchecked boxes with <code>hx-off-value</code> send that value</li>
+                <li>Unchecked boxes without <code>hx-off-value</code> send nothing</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Register service worker to intercept API requests
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('Service Worker registered:', registration);
+                    await navigator.serviceWorker.ready;
+
+                    const note = document.querySelector('.note');
+                    if (note) {
+                        note.innerHTML = '<strong>Service Worker Active!</strong> Requests are being intercepted and their details are shown below each button click.';
+                        note.style.background = '#d1fae5';
+                        note.style.borderColor = '#22c55e';
+                    }
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
