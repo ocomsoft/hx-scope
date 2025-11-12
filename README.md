@@ -161,6 +161,215 @@ The extension queries for elements matching the `hx-scope` selector, then includ
 
 **Key difference**: Without scoping, clicking "Register" would send **all inputs** (username, both emails, page-id). With hx-scope, you use CSS selectors to include exactly the inputs you want.
 
+## More Examples
+
+### Using ID Selectors
+
+```html
+<div hx-ext="scoped-inputs">
+  <div id="shipping-info">
+    <input hx-name="shipping_address" value="123 Main St">
+    <input hx-name="shipping_city" value="Boston">
+  </div>
+
+  <div id="billing-info">
+    <input hx-name="billing_address" value="456 Oak Ave">
+    <input hx-name="billing_city" value="NYC">
+  </div>
+
+  <!-- Include all inputs within #shipping-info -->
+  <button hx-post="/update-shipping" hx-scope="#shipping-info input[hx-name]">
+    Update Shipping
+  </button>
+
+  <!-- Include inputs from both sections -->
+  <button hx-post="/checkout" hx-scope="#shipping-info input, #billing-info input">
+    Checkout
+  </button>
+</div>
+```
+
+### Using :not() Pseudo-Selector
+
+```html
+<div hx-ext="scoped-inputs">
+  <input hx-name="username" class="user-data sensitive">
+  <input hx-name="email" class="user-data">
+  <input hx-name="bio" class="user-data">
+  <input hx-name="password" class="user-data sensitive">
+
+  <!-- Include all user-data EXCEPT sensitive fields -->
+  <button hx-post="/preview" hx-scope=".user-data:not(.sensitive)">
+    Preview Profile
+  </button>
+
+  <!-- Include everything -->
+  <button hx-post="/save" hx-scope=".user-data">
+    Save All
+  </button>
+</div>
+```
+
+### Using Child and Descendant Selectors
+
+```html
+<div hx-ext="scoped-inputs" id="form-container">
+  <div class="section">
+    <input hx-name="field1" value="direct child">
+    <div class="nested">
+      <input hx-name="field2" value="nested descendant">
+    </div>
+  </div>
+
+  <!-- Direct children only (>) -->
+  <button hx-post="/api/direct" hx-scope=".section > input[hx-name]">
+    Submit Direct Children
+  </button>
+
+  <!-- All descendants (space) -->
+  <button hx-post="/api/all" hx-scope=".section input[hx-name]">
+    Submit All Descendants
+  </button>
+</div>
+```
+
+### Dynamic Wizard/Stepper Forms
+
+```html
+<div hx-ext="scoped-inputs">
+  <div class="step" data-step="1">
+    <input hx-name="name" value="John">
+    <input hx-name="age" value="30">
+  </div>
+
+  <div class="step" data-step="2">
+    <input hx-name="address" value="123 Main">
+    <input hx-name="city" value="Boston">
+  </div>
+
+  <div class="step" data-step="3">
+    <input hx-name="card_number" value="****">
+    <input hx-name="cvv" value="123">
+  </div>
+
+  <!-- Submit current step only -->
+  <button hx-post="/save-step-1" hx-scope="[data-step='1'] input[hx-name]">
+    Save Step 1
+  </button>
+
+  <!-- Submit steps 1 and 2 together -->
+  <button hx-post="/save-progress" hx-scope="[data-step='1'] input, [data-step='2'] input">
+    Save Progress
+  </button>
+
+  <!-- Submit all steps -->
+  <button hx-post="/submit-all" hx-scope=".step input[hx-name]">
+    Complete Wizard
+  </button>
+</div>
+```
+
+### Combining Multiple Conditions
+
+```html
+<div hx-ext="scoped-inputs">
+  <input hx-name="public_name" class="profile" data-visibility="public">
+  <input hx-name="public_bio" class="profile" data-visibility="public">
+  <input hx-name="private_email" class="profile" data-visibility="private">
+  <input hx-name="admin_notes" class="admin">
+
+  <!-- Only public profile fields -->
+  <button hx-post="/api/public" hx-scope=".profile[data-visibility='public']">
+    Update Public Profile
+  </button>
+
+  <!-- All profile fields (public + private) -->
+  <button hx-post="/api/profile" hx-scope=".profile">
+    Update Full Profile
+  </button>
+
+  <!-- Everything including admin -->
+  <button hx-post="/api/admin-save" hx-scope=".profile, .admin">
+    Admin Save
+  </button>
+</div>
+```
+
+### Using Attribute Presence Selectors
+
+```html
+<div hx-ext="scoped-inputs">
+  <input hx-name="required_field1" data-required>
+  <input hx-name="optional_field1">
+  <input hx-name="required_field2" data-required>
+  <input hx-name="optional_field2">
+
+  <!-- Only required fields -->
+  <button hx-post="/validate-required" hx-scope="[data-required]">
+    Check Required Fields
+  </button>
+
+  <!-- Only optional fields -->
+  <button hx-post="/validate-optional" hx-scope="input[hx-name]:not([data-required])">
+    Check Optional Fields
+  </button>
+</div>
+```
+
+### Multi-Tenant / Multi-Entity Forms
+
+```html
+<div hx-ext="scoped-inputs">
+  <!-- User A inputs -->
+  <input hx-name="email" data-user="user-a" value="alice@example.com">
+  <input hx-name="phone" data-user="user-a" value="555-0001">
+
+  <!-- User B inputs -->
+  <input hx-name="email" data-user="user-b" value="bob@example.com">
+  <input hx-name="phone" data-user="user-b" value="555-0002">
+
+  <!-- Global/shared inputs -->
+  <input hx-name="organization" data-shared value="Acme Corp">
+
+  <!-- Update just User A -->
+  <button hx-post="/update-user/a" hx-scope="[data-user='user-a']">
+    Update Alice
+  </button>
+
+  <!-- Update User B with shared data -->
+  <button hx-post="/update-user/b" hx-scope="[data-user='user-b'], [data-shared]">
+    Update Bob (+ Org)
+  </button>
+</div>
+```
+
+### Conditional Fields Based on Type
+
+```html
+<div hx-ext="scoped-inputs">
+  <input hx-name="title" type="text" value="My Post">
+  <textarea hx-name="content">Post content here</textarea>
+  <input hx-name="publish_date" type="date">
+  <input hx-name="featured_image" type="file">
+  <input hx-name="tags" type="text">
+
+  <!-- Text inputs only -->
+  <button hx-post="/save-text" hx-scope="input[type='text']">
+    Save Text Fields
+  </button>
+
+  <!-- Everything except file inputs -->
+  <button hx-post="/save-draft" hx-scope="input:not([type='file']), textarea">
+    Save Draft
+  </button>
+
+  <!-- All inputs and textareas -->
+  <button hx-post="/publish" hx-scope="input[hx-name], textarea[hx-name]">
+    Publish
+  </button>
+</div>
+```
+
 ## Use Cases
 
 ### Only Send What You Need
