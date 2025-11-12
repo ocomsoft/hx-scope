@@ -111,8 +111,9 @@
     <h1>hx-scope Extension Demo</h1>
 
     <div class="note">
-        <strong>Note:</strong> This demo uses mock endpoints that will show what parameters would be sent.
-        In a real application, these would be actual server endpoints.
+        <strong>Note:</strong> This demo uses a Service Worker to intercept requests and display the parameters being sent.
+        You must serve this file from a web server (e.g., <code>python -m http.server</code> or <code>npx serve</code>) for the Service Worker to work.
+        Opening the file directly (file://) will not work.
     </div>
 
     <!-- Demo 1: Basic Scoping -->
@@ -229,41 +230,58 @@
         <div id="response3" class="response"></div>
     </div>
 
-    <!-- Mock server simulation script -->
+    <!-- Service Worker Registration -->
     <script>
-        // Intercept HTMX requests and show what would be sent
+        // Register service worker to intercept API requests
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('Service Worker registered:', registration);
+
+                    // Wait for service worker to be ready
+                    await navigator.serviceWorker.ready;
+                    console.log('Service Worker is ready and will intercept /api/* requests');
+
+                    // Show a message to the user
+                    const note = document.querySelector('.note');
+                    if (note) {
+                        note.innerHTML = '<strong>Service Worker Active!</strong> All requests to /api/* endpoints are being intercepted and their details are shown below each button click.';
+                        note.style.background = '#d1fae5';
+                        note.style.borderColor = '#22c55e';
+                    }
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                    const note = document.querySelector('.note');
+                    if (note) {
+                        note.innerHTML = '<strong>Note:</strong> Service Worker registration failed. This demo requires a web server (use <code>python -m http.server</code> or similar).';
+                    }
+                }
+            });
+        } else {
+            console.warn('Service Workers are not supported in this browser');
+            const note = document.querySelector('.note');
+            if (note) {
+                note.innerHTML = '<strong>Warning:</strong> Service Workers are not supported in this browser. The demo may not work correctly.';
+                note.style.background = '#fee2e2';
+                note.style.borderColor = '#ef4444';
+            }
+        }
+
+        // Log HTMX events for debugging
         document.body.addEventListener('htmx:configRequest', function(evt) {
-            console.log('Request configured:', evt.detail);
+            console.log('HTMX Request configured:', {
+                path: evt.detail.path,
+                verb: evt.detail.verb,
+                parameters: evt.detail.parameters
+            });
         });
 
-        document.body.addEventListener('htmx:beforeRequest', function(evt) {
-            // Prevent actual request
-            evt.preventDefault();
-
-            const target = evt.detail.target;
-            const params = evt.detail.xhr.parameters || {};
-
-            // Get the actual parameters that would be sent
-            const formData = new FormData();
-            for (const [key, value] of Object.entries(evt.detail.parameters)) {
-                formData.append(key, value);
-            }
-
-            // Display the parameters
-            const responseDiv = document.querySelector(evt.detail.target.getAttribute('hx-target'));
-            if (responseDiv) {
-                const paramsObj = {};
-                for (const [key, value] of Object.entries(evt.detail.parameters)) {
-                    paramsObj[key] = value;
-                }
-
-                responseDiv.innerHTML = `
-                    <strong>Request would be sent to:</strong> ${evt.detail.path}<br>
-                    <strong>Method:</strong> ${evt.detail.verb}<br>
-                    <strong>Parameters:</strong><br>
-                    <pre>${JSON.stringify(paramsObj, null, 2)}</pre>
-                `;
-            }
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            console.log('HTMX Request completed:', {
+                path: evt.detail.pathInfo.requestPath,
+                successful: evt.detail.successful
+            });
         });
     </script>
 </body>

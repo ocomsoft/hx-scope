@@ -24,6 +24,27 @@ Then include in your HTML:
 <script src="node_modules/hx-scope/hx-scope.js"></script>
 ```
 
+## Try the Demo
+
+An interactive demo is available in the `examples/` directory. To run it:
+
+```bash
+# Clone the repository
+git clone https://github.com/ocomsoft/hx-scope.git
+cd hx-scope/examples
+
+# Start a local web server (choose one):
+python -m http.server 8000
+# or
+npx serve
+# or
+php -S localhost:8000
+
+# Then open http://localhost:8000/demo.html in your browser
+```
+
+The demo uses a Service Worker to intercept and display request details, so it must be served from a web server (opening the file directly won't work).
+
 ## Usage
 
 ### Basic Example
