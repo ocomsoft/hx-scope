@@ -254,18 +254,40 @@
                 try {
                     const registration = await navigator.serviceWorker.register('./sw.js');
                     console.log('Service Worker registered:', registration);
-                    await navigator.serviceWorker.ready;
 
-                    const note = document.querySelectorAll('.note')[0];
+                    // Wait for service worker to be ready
+                    await navigator.serviceWorker.ready;
+                    console.log('Service Worker ready!');
+
+                    const note = document.querySelector('.note');
                     if (note) {
-                        note.innerHTML = '<strong>Service Worker Active!</strong> Requests are being intercepted. Try the Calculate and Checkout buttons!';
+                        note.innerHTML = '<strong>Service Worker Active!</strong> Requests are being intercepted and their details are shown below each button click.';
                         note.style.background = '#d1fae5';
                         note.style.borderColor = '#22c55e';
                     }
                 } catch (error) {
                     console.error('Service Worker registration failed:', error);
+                    const note = document.querySelector('.note');
+                    if (note) {
+                        note.innerHTML = '<strong>⚠️ Service Worker Failed!</strong> ' + error.message + '. Make sure you are accessing via http:// (not file://)';
+                        note.style.background = '#fee2e2';
+                        note.style.borderColor = '#dc2626';
+                    }
                 }
             });
+
+            // Check if service worker is controlling the page
+            if (navigator.serviceWorker.controller) {
+                console.log('Service Worker already controlling the page');
+            } else {
+                console.log('Service Worker NOT controlling the page - page needs to be reloaded');
+                const reloadNote = document.getElementById('reload-note');
+                if (reloadNote) {
+                    reloadNote.style.display = 'inline';
+                }
+            }
+        } else {
+            console.error('Service Workers not supported in this browser');
         }
     </script>
 </body>
